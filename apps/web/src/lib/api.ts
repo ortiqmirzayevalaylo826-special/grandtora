@@ -11,7 +11,7 @@ export interface Paged<T> { total: number; page: number; limit: number; pages: n
 
 export async function apiGet<T>(path: string): Promise<T | null> {
   try {
-    const r = await fetch(`${BASE}/api${path}`, { next: { revalidate: 60 } });
+    const r = await fetch(`${BASE}/api${path}`, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
     return r.ok ? ((await r.json()) as T) : null;
   } catch {
     return null; // API o'chiq bo'lsa sahifa yiqilmasin

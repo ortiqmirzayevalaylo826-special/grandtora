@@ -3,6 +3,8 @@ import { Link } from '@/i18n/routing';
 import { Paged, Scholarship, apiGet } from '@/lib/api';
 import ScholarshipCard from '@/components/ScholarshipCard';
 
+export const dynamic = 'force-dynamic';
+
 type SP = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v.join(',') : v ?? '');
 

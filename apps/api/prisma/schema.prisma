@@ -8,15 +8,57 @@ datasource db {
   directUrl = env("DIRECT_URL")     // migratsiya/db push uchun: session pooler (5432) yoki lokalda o'sha DATABASE_URL
 }
 
-enum Role { STUDENT ADMIN }
-enum StudyLevel { BACHELOR MASTER PHD }
-enum FundingType { FULL PARTIAL TUITION LIVING }
-enum ScholarshipStatus { DRAFT PENDING PUBLISHED REJECTED EXPIRED ARCHIVED }
-enum ApplicationStatus { INTERESTED PREPARING SUBMITTED REVIEW INTERVIEW ACCEPTED REJECTED }
-enum OtpPurpose { REGISTER LOGIN RESET }
-enum ReviewStatus { PENDING APPROVED REJECTED }
-enum ReportStatus { OPEN RESOLVED }
-enum NotificationType { DEADLINE_REMINDER ADMIN_MESSAGE SYSTEM }
+enum Role {
+  STUDENT
+  ADMIN
+}
+enum StudyLevel {
+  BACHELOR
+  MASTER
+  PHD
+}
+enum FundingType {
+  FULL
+  PARTIAL
+  TUITION
+  LIVING
+}
+enum ScholarshipStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  REJECTED
+  EXPIRED
+  ARCHIVED
+}
+enum ApplicationStatus {
+  INTERESTED
+  PREPARING
+  SUBMITTED
+  REVIEW
+  INTERVIEW
+  ACCEPTED
+  REJECTED
+}
+enum OtpPurpose {
+  REGISTER
+  LOGIN
+  RESET
+}
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+enum ReportStatus {
+  OPEN
+  RESOLVED
+}
+enum NotificationType {
+  DEADLINE_REMINDER
+  ADMIN_MESSAGE
+  SYSTEM
+}
 
 model User {
   id              String    @id @default(uuid())

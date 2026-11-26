@@ -3,6 +3,8 @@ import { Link } from '@/i18n/routing';
 import { Paged, Scholarship, apiGet } from '@/lib/api';
 import ScholarshipCard from '@/components/ScholarshipCard';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

@@ -6,6 +6,8 @@ import { Scholarship, apiGet, countryName, daysLeft } from '@/lib/api';
 import { SITE_URL } from '@/brand';
 import DetailActions from '@/components/DetailActions';
 
+export const dynamic = 'force-dynamic';
+
 type P = { params: Promise<{ locale: string; slug: string }> };
 
 export async function generateMetadata({ params }: P): Promise<Metadata> {
