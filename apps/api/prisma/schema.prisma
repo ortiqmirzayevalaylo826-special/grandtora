@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")   // ish vaqtida: pooler (Supabase: transaction, 6543, ?pgbouncer=true)
+  directUrl = env("DIRECT_URL")     // migratsiya/db push uchun: session pooler (5432) yoki lokalda o'sha DATABASE_URL
+}
+
+enum Role { STUDENT ADMIN }
+enum StudyLevel { BACHELOR MASTER PHD }
+enum FundingType { FULL PARTIAL TUITION LIVING }
+enum ScholarshipStatus { DRAFT PENDING PUBLISHED REJECTED EXPIRED ARCHIVED }
+enum ApplicationStatus { INTERESTED PREPARING SUBMITTED REVIEW INTERVIEW ACCEPTED REJECTED }
+enum OtpPurpose { REGISTER LOGIN RESET }
+enum ReviewStatus { PENDING APPROVED REJECTED }
+enum ReportStatus { OPEN RESOLVED }
+enum NotificationType { DEADLINE_REMINDER ADMIN_MESSAGE SYSTEM }
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String
+  role            Role      @default(STUDENT)
+  firstName       String
+  lastName        String
+  locale          String    @default("uz")
+  emailVerifiedAt DateTime?
+  blockedAt       DateTime?
+  failedLogins    Int       @default(0)
+  lockedUntil     DateTime?
+  emailReminders  Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  profile       Profile?
+  saved         SavedScholarship[]
+  applications  Application[]
+  documents     Document[]
+  notifications Notification[]
+  reviews       Review[]
+  reports       ProblemReport[]
+  refreshTokens RefreshToken[]
+}
+
+model Profile {
+  userId       String   @id
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone        String?
+  country      String?
+  university   String?
+  faculty      String?
+  major        String?
+  level        StudyLevel?
+  gpa          Decimal? @db.Decimal(3, 2)
+  ielts        Decimal? @db.Decimal(2, 1)
+  birthYear    Int?
+  languages    String[]
+  interests    String?
+  achievements String?
+  updatedAt    DateTime @updatedAt
+}
+
+model OtpCode {
+  id         String     @id @default(uuid())
+  email      String
+  purpose    OtpPurpose
+  codeHash   String
+  attempts   Int        @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+
+  @@index([email, purpose, createdAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Country {
+  code         String        @id            // ISO 3166-1 alpha-2, masalan DE
+  nameUz       String
+  nameRu       String
+  nameEn       String
+  scholarships Scholarship[]
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  slug         String        @unique
+  nameUz       String
+  nameRu       String
+  nameEn       String
+  scholarships Scholarship[]
+}
+
+model Scholarship {
+  id             String            @id @default(uuid())
+  slug           String            @unique
+  organization   String
+  countryCode    String
+  country        Country           @relation(fields: [countryCode], references: [code])
+  categoryId     String?
+  category       Category?         @relation(fields: [categoryId], references: [id])
+  levels         StudyLevel[]
+  fields         String[]
+  funding        FundingType
+  languageReq    String?
+  ieltsMin       Decimal?          @db.Decimal(2, 1)
+  gpaMin         Decimal?          @db.Decimal(3, 2)
+  ageMin         Int?
+  ageMax         Int?
+  noEssay        Boolean           @default(false)
+  deadline       DateTime?
+  rolling        Boolean           @default(false)
+  officialUrl    String
+  coverImage     String?
+  status         ScholarshipStatus @default(DRAFT)
+  featured       Boolean           @default(false)
+  isDemo         Boolean           @default(false)
+  lastVerifiedAt DateTime?
+  views          Int               @default(0)
+  publishedAt    DateTime?
+  createdById    String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  translations ScholarshipTranslation[]
+  saved        SavedScholarship[]
+  applications Application[]
+  reviews      Review[]
+  reports      ProblemReport[]
+
+  @@index([status, deadline])
+  @@index([countryCode])
+  @@index([funding])
+}
+
+model ScholarshipTranslation {
+  id            String      @id @default(uuid())
+  scholarshipId String
+  scholarship   Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  locale        String                      // uz | ru | en
+  title         String
+  summary       String
+  description   String?
+  eligibility   String?
+  documents     String[]
+  process       String[]
+
+  @@unique([scholarshipId, locale])
+}
+
+model SavedScholarship {
+  userId        String
+  scholarshipId String
+  createdAt     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarship   Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@id([userId, scholarshipId])
+}
+
+model Application {
+  id            String            @id @default(uuid())
+  userId        String
+  scholarshipId String
+  status        ApplicationStatus @default(INTERESTED)
+  note          String?
+  checklist     Json              @default("[]")   // hujjatlar checklisti: boolean[]
+  submittedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarship   Scholarship       @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scholarshipId])
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  mime       String
+  sizeBytes  Int
+  storageKey String
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  dedupeKey String?          @unique          // bir xil eslatma ikki marta yaratilmasligi uchun
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, readAt])
+}
+
+model Review {
+  id            String       @id @default(uuid())
+  userId        String
+  scholarshipId String
+  stars         Int
+  text          String
+  status        ReviewStatus @default(PENDING)
+  createdAt     DateTime     @default(now())
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarship   Scholarship  @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@index([scholarshipId, status])
+}
+
+model ProblemReport {
+  id            String       @id @default(uuid())
+  scholarshipId String
+  userId        String?
+  text          String
+  status        ReportStatus @default(OPEN)
+  createdAt     DateTime     @default(now())
+  scholarship   Scholarship  @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

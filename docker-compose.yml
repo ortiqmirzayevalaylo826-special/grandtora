@@ -1,0 +1,19 @@
+# Mahalliy rivojlantirish uchun: PostgreSQL, Redis va test pochta (Mailpit).
+# Ishga tushirish: docker compose up -d   (Docker Desktop kerak)
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: grantora
+      POSTGRES_PASSWORD: grantora_dev
+      POSTGRES_DB: grantora
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  mail:
+    image: axllent/mailpit
+    ports: ["1025:1025", "8025:8025"]   # SMTP 1025, veb-interfeys http://localhost:8025
+volumes:
+  pgdata:

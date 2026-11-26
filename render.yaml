@@ -1,0 +1,49 @@
+# Render Blueprint — GitHub repo ildizida turadi. Render: New → Blueprint → shu repo.
+# Maxfiy qiymatlar (sync: false) Render panelida qo'lda kiritiladi, gitga yozilmaydi.
+services:
+  - type: web
+    name: grantora-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install --include=dev && npx prisma generate --schema apps/api/prisma/schema.prisma && npx prisma db push --skip-generate --schema apps/api/prisma/schema.prisma && npm run build -w apps/api
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        sync: false          # Supabase: Transaction pooler (6543) + ?pgbouncer=true
+      - key: DIRECT_URL
+        sync: false          # Supabase: Session pooler (5432)
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: OTP_PEPPER
+        generateValue: true
+      - key: WEB_ORIGIN
+        sync: false          # masalan https://grantora-web.onrender.com
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: MAIL_PROVIDER
+        value: brevo         # Render bepul rejasida SMTP portlari yopiq
+      - key: MAIL_FROM
+        sync: false          # "Grantora <tasdiqlangan@email>"
+      - key: BREVO_API_KEY
+        sync: false
+
+  - type: web
+    name: grantora-web
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install --include=dev && npm run build -w apps/web
+    startCommand: npm run start -w apps/web
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: API_URL
+        sync: false          # masalan https://grantora-api.onrender.com
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false          # masalan https://grantora-web.onrender.com

@@ -1,0 +1,16 @@
+node_modules
+.env
+.env.local
+.env.*.local
+.next
+dist
+*.log
+*.tsbuildinfo
+next-env.d.ts
+uploads/
+.DS_Store
+
+# Lokal materiallar (GitHub ga yuklanmaydi)
+demo/
+docs/
+grantora/
