@@ -27,11 +27,13 @@ services:
       - key: COOKIE_SECURE
         value: "true"
       - key: MAIL_PROVIDER
-        value: brevo         # Render bepul rejasida SMTP portlari yopiq
+        value: gmail         # Gmail ko'prigi (Apps Script); Render bepul rejasida SMTP portlari yopiq
       - key: MAIL_FROM
-        sync: false          # "Grantora <tasdiqlangan@email>"
-      - key: BREVO_API_KEY
-        sync: false
+        sync: false          # "Grantora <sizning@gmail.com>"
+      - key: EMAIL_RELAY_URL
+        sync: false          # Apps Script Web app URL (.../exec)
+      - key: EMAIL_RELAY_TOKEN
+        sync: false          # gmail_relay.gs dagi TOKEN
 
   - type: web
     name: grantora-web

@@ -3,16 +3,16 @@ import * as nodemailer from 'nodemailer';
 
 const T: Record<string, { otp: (c: string) => [string, string]; reminder: (t: string, n: number) => [string, string] }> = {
   uz: {
-    otp: (c) => ['Tasdiqlash kodi', `Sizning kodingiz: ${c}\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang.`],
-    reminder: (t, n) => [`Muddat yaqinlashmoqda: ${t}`, `"${t}" arizasi muddati ${n} kundan keyin tugaydi.`],
+    otp: (c) => ['Grantora: tasdiqlash kodi', `Grantora\n\nSizning kodingiz: ${c}\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang.`],
+    reminder: (t, n) => [`Grantora: muddat yaqinlashmoqda — ${t}`, `Grantora\n\n"${t}" arizasi muddati ${n} kundan keyin tugaydi.`],
   },
   ru: {
-    otp: (c) => ['Код подтверждения', `Ваш код: ${c}\nКод действует 5 минут. Никому его не сообщайте.`],
-    reminder: (t, n) => [`Срок приближается: ${t}`, `Приём заявок на «${t}» заканчивается через ${n} дн.`],
+    otp: (c) => ['Grantora: код подтверждения', `Grantora\n\nВаш код: ${c}\nКод действует 5 минут. Никому его не сообщайте.`],
+    reminder: (t, n) => [`Grantora: срок приближается — ${t}`, `Grantora\n\nПриём заявок на «${t}» заканчивается через ${n} дн.`],
   },
   en: {
-    otp: (c) => ['Your verification code', `Your code: ${c}\nIt is valid for 5 minutes. Never share it with anyone.`],
-    reminder: (t, n) => [`Deadline approaching: ${t}`, `Applications for "${t}" close in ${n} day(s).`],
+    otp: (c) => ['Grantora: your verification code', `Grantora\n\nYour code: ${c}\nIt is valid for 5 minutes. Never share it with anyone.`],
+    reminder: (t, n) => [`Grantora: deadline approaching — ${t}`, `Grantora\n\nApplications for "${t}" close in ${n} day(s).`],
   },
 };
 
@@ -20,6 +20,8 @@ const T: Record<string, { otp: (c: string) => [string, string]; reminder: (t: st
  * Pochta yuborish. MAIL_PROVIDER:
  *  - "smtp"  : oddiy SMTP (lokal: Mailpit; Gmail App Password; pullik hosting). DIQQAT: Render BEPUL rejasi
  *              25/465/587 portlarni bloklaydi, shuning uchun u yerda SMTP ishlamaydi.
+ *  - "gmail" : Gmail ko'prigi (Google Apps Script web app, backend/scripts/gmail_relay.gs). HTTPS orqali, bepul, Render bepul rejasida
+ *              ishlaydi. EMAIL_RELAY_URL va EMAIL_RELAY_TOKEN kerak. Xat sizning Gmail akkauntingizdan ketadi (kuniga ~100 ta).
  *  - "brevo" : Brevo HTTP API (HTTPS 443 orqali) — Render bepul rejasida ishlaydi. SMTP login/parol emas, API kalit kerak.
  */
 @Injectable()
@@ -45,6 +47,20 @@ export class MailService {
 
   private async send(to: string, subject: string, text: string) {
     try {
+      if (this.provider === 'gmail') {
+        const url = process.env.EMAIL_RELAY_URL;
+        if (!url) return this.log.error('EMAIL_RELAY_URL sozlanmagan');
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'content-type': 'text/plain;charset=utf-8' }, // Apps Script uchun oddiy so'rov (preflight yo'q)
+          body: JSON.stringify({ token: process.env.EMAIL_RELAY_TOKEN ?? '', to, subject, body: text, name: this.parseFrom().name }),
+          redirect: 'follow',
+          signal: AbortSignal.timeout(15_000),
+        });
+        const j = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+        if (!res.ok || !j?.ok) this.log.error(`Gmail ko'prigi xato ${res.status}: ${j?.error ?? 'javob yo\'q'}`);
+        return;
+      }
       if (this.provider === 'brevo') {
         const res = await fetch('https://api.brevo.com/v3/smtp/email', {
           method: 'POST',

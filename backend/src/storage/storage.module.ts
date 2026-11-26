@@ -25,7 +25,7 @@ export class StorageService {
 
   async put(key: string, data: Buffer, mime: string) {
     if (this.remote) {
-      const r = await fetch(`${this.url}/storage/v1/object/${this.bucket}/${key}`, { method: 'POST', headers: this.headers({ 'Content-Type': mime, 'x-upsert': 'false' }), body: data, signal: AbortSignal.timeout(20_000) });
+      const r = await fetch(`${this.url}/storage/v1/object/${this.bucket}/${key}`, { method: 'POST', headers: this.headers({ 'Content-Type': mime, 'x-upsert': 'false' }), body: new Uint8Array(data), signal: AbortSignal.timeout(20_000) });
       if (!r.ok) throw new Error(`storage_put_${r.status}`);
       return;
     }
