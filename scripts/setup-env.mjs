@@ -13,7 +13,7 @@ function make(from, to, fill) {
 }
 
 let adminPass = '';
-make('apps/api/.env.example', 'apps/api/.env', (s) => {
+make('backend/.env.example', 'backend/.env', (s) => {
   adminPass = strong();
   return s
     .replace(/^JWT_ACCESS_SECRET=.*$/m, `JWT_ACCESS_SECRET="${secret()}"`)
@@ -21,5 +21,5 @@ make('apps/api/.env.example', 'apps/api/.env', (s) => {
     .replace(/^OTP_PEPPER=.*$/m, `OTP_PEPPER="${secret()}"`)
     .replace(/^ADMIN_PASSWORD=.*$/m, `ADMIN_PASSWORD="${adminPass}"`);
 });
-make('apps/web/.env.example', 'apps/web/.env.local');
-if (adminPass) console.log(`\nAdmin kirishi:  admin@grantora.local  /  ${adminPass}\n(apps/api/.env faylida ADMIN_EMAIL va ADMIN_PASSWORD ni o'zgartirishingiz mumkin)`);
+make('frontend/.env.example', 'frontend/.env.local');
+if (adminPass) console.log(`\nAdmin kirishi:  admin@grantora.local  /  ${adminPass}\n(backend/.env faylida ADMIN_EMAIL va ADMIN_PASSWORD ni o'zgartirishingiz mumkin)`);

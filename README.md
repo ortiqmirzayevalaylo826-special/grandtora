@@ -7,8 +7,8 @@ Talabalar uchun dunyo bo'ylab grant/stipendiyalar katalogi, shaxsiy kabinet va a
 ## Tuzilma
 | Papka | Vazifa |
 |---|---|
-| `apps/api` | **Backend** — NestJS + Prisma + PostgreSQL (auth, RBAC, grantlar, kabinet, admin, eslatmalar, hujjatlar) |
-| `apps/web` | **Frontend** — Next.js 15 + TypeScript + Tailwind + next-intl (sayt, kabinet `/app`, admin `/admin`) |
+| `backend` | **Backend** — NestJS + Prisma + PostgreSQL (auth, RBAC, grantlar, kabinet, admin, eslatmalar, hujjatlar) |
+| `frontend` | **Frontend** — Next.js 15 + TypeScript + Tailwind + next-intl (sayt, kabinet `/app`, admin `/admin`) |
 | `docker-compose.yml` | Lokal PostgreSQL, Redis, Mailpit (test pochta) |
 | `render.yaml` | Render uchun avtomatik joylash sozlamasi |
 
@@ -25,7 +25,7 @@ npm run db:seed           # davlatlar, kategoriyalar, namunaviy grantlar, admin
 npm run backend           # 1-terminal: API  http://localhost:4000/api/health
 npm run frontend          # 2-terminal: sayt http://localhost:3000
 ```
-- `npm run setup` `apps/api/.env` va `apps/web/.env.local` ni yaratadi (mavjudiga tegmaydi). Admin: `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`apps/api/.env`).
+- `npm run setup` `backend/.env` va `frontend/.env.local` ni yaratadi (mavjudiga tegmaydi). Admin: `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`backend/.env`).
 - Ro'yxatdan o'tishda kelgan 6 xonali kodni **Mailpit** da ko'rasiz: http://localhost:8025
 - Talaba hisobi — saytdagi «Ro'yxatdan o'tish» orqali; admin — `/login` da admin email bilan kiring (`/admin` ochiladi).
 

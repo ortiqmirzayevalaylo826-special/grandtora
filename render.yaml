@@ -6,8 +6,8 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm install --include=dev && npx prisma generate --schema apps/api/prisma/schema.prisma && npx prisma db push --skip-generate --schema apps/api/prisma/schema.prisma && npm run build -w apps/api
-    startCommand: node apps/api/dist/main.js
+    buildCommand: npm install --include=dev && npx prisma generate --schema backend/prisma/schema.prisma && npx prisma db push --skip-generate --schema backend/prisma/schema.prisma && npm run build -w backend
+    startCommand: node backend/dist/main.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
@@ -38,8 +38,8 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm install --include=dev && npm run build -w apps/web
-    startCommand: npm run start -w apps/web
+    buildCommand: npm install --include=dev && npm run build -w frontend
+    startCommand: npm run start -w frontend
     envVars:
       - key: NODE_VERSION
         value: 20
