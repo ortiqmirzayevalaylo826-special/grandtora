@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { useAuth } from '@/lib/auth';
 import { PageTitle, Tabs, useL } from '@/components/admin/kit';
+import LockSettings from '@/components/LockSettings';
 import LangSwitch from '@/components/LangSwitch';
 import PwaClient from '@/components/PwaClient';
 import { AvatarUploader, NameLangForm, PasswordForm, SessionsList, SettingsCard as Card } from '@/components/AccountParts';
@@ -28,6 +29,7 @@ export default function AdminSettings() {
       )}
       {tab === 'security' && (
         <div className="space-y-5">
+          <Card title={L('PIN-kod va barmoq izi', 'PIN-код и отпечаток', 'PIN & fingerprint')}><LockSettings /></Card>
           <Card title={L("Parolni o'zgartirish", 'Смена пароля', 'Change password')}><PasswordForm /></Card>
           <Card title={L('Faol qurilmalar', 'Активные устройства', 'Active devices')} hint={L('Admin hisobiga kirgan qurilmalar. Notanishini darhol chiqarib yuboring.', 'Устройства с входом в админ-аккаунт. Незнакомые завершите сразу.', 'Devices signed in to this admin account. End unknown ones immediately.')}><SessionsList /></Card>
           <Card title={L('Seans', 'Сеанс', 'Session')}><button className="btn btn-ghost" onClick={async () => { await logout(); router.replace('/login'); }}>{L('Chiqish', 'Выйти', 'Log out')}</button></Card>

@@ -28,9 +28,9 @@ export default function AuthShell({ mode, children }: { mode: 'login' | 'registe
       </div>
       <div className="mx-auto grid w-full max-w-5xl overflow-hidden bg-white shadow-card sm:rounded-[28px] sm:border sm:border-navy/10 lg:min-h-[640px] lg:grid-cols-[0.92fr_1.08fr]">
         {/* Chap panel: rasm to'liq ko'rinadi, matn uning ustida */}
-        <aside className="relative isolate flex min-h-[260px] flex-col justify-between overflow-hidden bg-[#064E3B] px-6 pb-6 pt-6 text-white lg:min-h-0 lg:px-9 lg:pb-8 lg:pt-8">
+        <aside className="relative isolate flex min-h-[340px] flex-col justify-between overflow-hidden bg-[#064E3B] px-6 pb-6 pt-6 text-white lg:min-h-0 lg:px-9 lg:pb-8 lg:pt-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={reg ? '/img/auth-register.jpg' : '/img/auth-login.jpg'} alt="" className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover ${reg ? 'object-[50%_0%]' : 'object-[50%_15%]'}`} />
+          <img src={reg ? '/img/auth-register.jpg' : '/img/auth-login.jpg'} alt="" className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover ${reg ? 'object-[50%_0%]' : 'object-[50%_20%]'}`} />
           <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ background: 'linear-gradient(to top, rgba(6,78,59,.96) 0%, rgba(6,78,59,.82) 28%, rgba(6,78,59,.25) 55%, rgba(6,78,59,0) 70%), linear-gradient(to bottom, rgba(6,78,59,.55) 0%, rgba(6,78,59,0) 22%)' }} />
 
           <Link href="/" className="flex w-fit items-center gap-2.5" aria-label="Grantora">
@@ -39,7 +39,7 @@ export default function AuthShell({ mode, children }: { mode: 'login' | 'registe
             <span className="font-head text-2xl font-extrabold drop-shadow">Grantora</span>
           </Link>
 
-          <div className="mt-24 lg:mt-0">
+          <div className="mt-16 lg:mt-0">
             <h2 className="max-w-md text-2xl font-extrabold leading-tight !text-white drop-shadow lg:text-[32px]">
               {reg ? t('pRegTitle1') : t('pLoginTitle1')} <span className="text-[#86efac]">{reg ? t('pRegTitle2') : t('pLoginTitle2')}</span>
             </h2>

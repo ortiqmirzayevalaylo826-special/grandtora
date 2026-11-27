@@ -5,7 +5,11 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@/lib/client';
 import LangSwitch from '@/components/LangSwitch';
 import PwaClient from '@/components/PwaClient';
-import UserAvatar from '@/components/UserAvatar';
+import ProfileMenu from '@/components/ProfileMenu';
+import LockGate from '@/components/LockGate';
+import DrawerHead from '@/components/DrawerHead';
+import OfflineBar from '@/components/OfflineBar';
+import { useBackClose } from '@/lib/useBackClose';
 import { Icon, Spinner } from '@/components/ui';
 import { Avatar, ToastProvider, useL } from './kit';
 
@@ -18,6 +22,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const { user, logout } = useAuth();
   const [drawer, setDrawer] = useState(false);
+  useBackClose(drawer, () => setDrawer(false));
   const [bell, setBell] = useState(false);
   const [menu, setMenu] = useState(false);
   const [q, setQ] = useState('');
@@ -43,7 +48,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   if (!user || user.role !== 'ADMIN') return <div className="grid min-h-screen place-items-center"><Spinner /></div>;
 
   const items: { href: string; label: string; icon: string; n?: number }[] = [
-    { href: '/admin', label: L('Statistika', 'Статистика', 'Statistics'), icon: 'chart' },
+    { href: '/admin', label: L('Bosh sahifa', 'Главная', 'Dashboard'), icon: 'home' },
     { href: '/admin/scholarships', label: L('Grantlar', 'Гранты', 'Grants'), icon: 'list', n: cnt?.grants },
     { href: '/admin/users', label: L('Foydalanuvchilar', 'Пользователи', 'Users'), icon: 'users' },
     { href: '/admin/messages', label: L('Xabarlar', 'Сообщения', 'Messages'), icon: 'msg', n: cnt?.chats },
@@ -68,21 +73,33 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const search = (e: FormEvent) => { e.preventDefault(); if (q.trim()) router.push(`/admin/scholarships?q=${encodeURIComponent(q.trim())}`); };
   const name = `${user.firstName} ${user.lastName}`.trim() || user.email;
 
+  const GROUPS: { t: [string, string, string]; hrefs: string[] }[] = [
+    { t: ['Asosiy', 'Основное', 'Main'], hrefs: ['/admin', '/admin/scholarships', '/admin/users', '/admin/messages'] },
+    { t: ['Boshqaruv', 'Управление', 'Manage'], hrefs: ['/admin/complaints', '/admin/reviews', '/admin/tickets', '/admin/freshness', '/admin/catalog', '/admin/audit'] },
+    { t: ['Yordam', 'Помощь', 'Help'], hrefs: ['/admin/guide', '/admin/settings'] },
+  ];
   const Nav = ({ compact }: { compact?: boolean }) => (
-    <ul className="space-y-1">
-      {items.map((i) => (
-        <li key={i.href}>
-          <Link href={i.href} title={i.label} aria-current={active(i.href) ? 'page' : undefined}
-            className={`relative flex h-11 items-center gap-3 rounded-xl text-sm font-semibold transition ${compact ? 'justify-center px-0' : 'px-3'} ${active(i.href) ? 'bg-primary text-white shadow-card' : 'text-navy/80 hover:bg-accent/60'}`}>
-            <Icon name={i.icon} className="h-5 w-5 shrink-0" />
-            {!compact && <span className="truncate">{i.label}</span>}
-            {!!i.n && (compact
-              ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-              : <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${active(i.href) ? 'bg-white/25' : 'bg-red-500 text-white'}`}>{i.n}</span>)}
-          </Link>
-        </li>
+    <div>
+      {(compact ? [{ t: ['', '', ''] as [string, string, string], hrefs: items.map((i) => i.href) }] : GROUPS).map((g, gi) => (
+        <div key={gi}>
+          {g.t[0] && <p className="mx-2 mb-1 mt-4 text-xs font-bold uppercase tracking-wide text-muted/80">{L(...g.t)}</p>}
+          <ul className="space-y-1">
+            {g.hrefs.map((h) => items.find((i) => i.href === h)!).map((i) => (
+              <li key={i.href}>
+                <Link href={i.href} title={i.label} aria-current={active(i.href) ? 'page' : undefined}
+                  className={`relative flex h-11 items-center gap-3 rounded-xl text-sm font-semibold transition ${compact ? 'justify-center px-0' : 'px-3'} ${active(i.href) ? 'bg-primary text-white shadow-card' : 'text-navy/80 hover:bg-accent/60'}`}>
+                  <Icon name={i.icon} className="h-5 w-5 shrink-0" />
+                  {!compact && <span className="truncate">{i.label}</span>}
+                  {!!i.n && (compact
+                    ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+                    : <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${active(i.href) ? 'bg-white/25' : 'bg-red-500 text-white'}`}>{i.n}</span>)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </div>
   );
   const Brand = ({ compact }: { compact?: boolean }) => (
     <Link href="/" className="flex items-center gap-2" aria-label="Grantora">
@@ -93,8 +110,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   );
 
   return (
-    <ToastProvider>
+    <ToastProvider><LockGate>
       <div className="min-h-screen bg-canvas md:pl-[72px] lg:pl-64">
+        <OfflineBar />
         {/* sidebar: planshet — ikonkalar, kompyuter — to'liq */}
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-[72px] flex-col border-r border-[#E5E7EB] bg-white md:flex lg:w-64">
           <div className="flex h-16 items-center justify-center px-3 lg:justify-start lg:px-5"><span className="lg:hidden"><Brand compact /></span><span className="hidden lg:block"><Brand /></span></div>
@@ -107,14 +125,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         {/* yuqori panel */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-[#E5E7EB] bg-white/95 px-3 backdrop-blur sm:px-6">
           <button className="grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas md:hidden" onClick={() => setDrawer(true)} aria-label="menu" aria-expanded={drawer}><Icon name="menu" /></button>
-          <span className="md:hidden"><Brand compact /></span>
+          <span className="shrink-0 md:hidden"><Brand compact /></span>
           <form onSubmit={search} className="relative ml-1 hidden min-w-0 max-w-md flex-1 sm:block" role="search">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"><Icon name="search" className="h-[18px] w-[18px]" /></span>
             <input className="input !h-10 !pl-10" value={q} onChange={(e) => setQ(e.target.value)} placeholder={L('Grant qidirish…', 'Поиск гранта…', 'Search grants…')} aria-label={L('Grant qidirish', 'Поиск гранта', 'Search grants')} />
           </form>
           <div className="ml-auto flex items-center gap-2" ref={popRef}>
-            <PwaClient />
-            <LangSwitch />
+            <span className="hidden md:block"><PwaClient /></span>
+            <span className="hidden md:block"><LangSwitch /></span>
             <div className="relative">
               <button className="relative grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" onClick={() => { setBell((v) => !v); setMenu(false); }} aria-label={L('Bildirishnomalar', 'Уведомления', 'Notifications')} aria-expanded={bell}>
                 <Icon name="bell" />{total > 0 && <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{total > 99 ? '99+' : total}</span>}
@@ -128,18 +146,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 </div>
               )}
             </div>
-            <div className="relative">
-              <button className="flex h-10 items-center gap-2 rounded-xl px-1.5 hover:bg-canvas sm:pr-2" onClick={() => { setMenu((v) => !v); setBell(false); }} aria-expanded={menu} aria-label={L('Profil', 'Профиль', 'Profile')}>
-                <UserAvatar user={user} /><span className="hidden max-w-[120px] truncate text-sm font-semibold sm:block">{user.firstName || 'Admin'}</span>
-              </button>
-              {menu && (
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#E5E7EB] bg-white p-2 shadow-2xl">
-                  <div className="px-3 py-2"><p className="truncate text-sm font-bold">{name}</p><p className="truncate text-xs text-muted">{user.email}</p><span className="mt-1 inline-block rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">ADMIN</span></div>
-                  <Link href="/" className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-canvas"><Icon name="external" className="h-4 w-4" />{L('Sayt', 'Сайт', 'Site')}</Link>
-                  <button className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-red-700 hover:bg-red-50" onClick={async () => { await logout(); router.replace('/login'); }}><Icon name="logout" className="h-4 w-4" />{L('Chiqish', 'Выйти', 'Log out')}</button>
-                </div>
-              )}
-            </div>
+            <ProfileMenu admin profileHref="/admin/settings" settingsHref="/admin/settings" />
           </div>
         </header>
 
@@ -148,8 +155,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="menu">
             <button className="absolute inset-0 bg-navy/40" onClick={() => setDrawer(false)} aria-label="close" />
             <div className="absolute inset-y-0 left-0 flex w-72 max-w-[86%] flex-col bg-white shadow-2xl">
-              <div className="flex h-16 items-center justify-between px-4"><Brand /><button className="grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" onClick={() => setDrawer(false)} aria-label="close"><Icon name="x" /></button></div>
-              <nav className="flex-1 overflow-y-auto px-3 py-2"><Nav /></nav>
+              <DrawerHead badge="ADMIN" onClose={() => setDrawer(false)} />
+              <nav className="flex-1 overflow-y-auto px-3 pb-2"><Nav /></nav>
               <div className="border-t border-[#E5E7EB] p-3"><Link href="/" className="btn btn-ghost w-full">{L('Saytga qaytish', 'На сайт', 'Back to site')}</Link></div>
             </div>
           </div>
@@ -168,6 +175,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <button onClick={() => setDrawer(true)} className="flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-muted"><Icon name="menu" className="h-5 w-5" />{L('Yana', 'Ещё', 'More')}</button>
         </nav>
       </div>
-    </ToastProvider>
+    </LockGate></ToastProvider>
   );
 }

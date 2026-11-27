@@ -6,7 +6,13 @@ import { BRAND } from '@/brand';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@/lib/client';
 import LangSwitch from '../LangSwitch';
-import UserAvatar from '../UserAvatar';
+import ProfileMenu from '../ProfileMenu';
+import LockGate from '../LockGate';
+import NotificationBell from '../NotificationBell';
+import { ToastProvider, useL } from '../admin/kit';
+import DrawerHead from '../DrawerHead';
+import OfflineBar from '../OfflineBar';
+import { useBackClose } from '@/lib/useBackClose';
 import PwaClient from '../PwaClient';
 import { Icon, Spinner } from '../ui';
 
@@ -37,6 +43,11 @@ const ADMIN: Item[] = [
   { href: '/admin/catalog', key: 'a_catalog', icon: 'globe' },
   { href: '/admin/audit', key: 'a_audit', icon: 'log' },
 ];
+const GROUPS: { t: [string, string, string]; keys: string[] }[] = [
+  { t: ['Asosiy', 'Основное', 'Main'], keys: ['overview', 'explore', 'recommended', 'saved', 'applications', 'documents', 'calendar'] },
+  { t: ['Boshqaruv', 'Управление', 'Manage'], keys: ['messages', 'notifications', 'profile', 'settings'] },
+  { t: ['Yordam', 'Помощь', 'Help'], keys: ['help'] },
+];
 const BOTTOM: Record<'student' | 'admin', string[]> = {
   student: ['overview', 'recommended', 'applications', 'messages', 'notifications'],
   admin: ['a_stats', 'a_sch', 'a_users', 'a_reports'],
@@ -53,11 +64,13 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
   const path = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const L = useL();
   const [open, setOpen] = useState(false);
+  useBackClose(open, () => setOpen(false));
   const [q, setQ] = useState('');
   const role = kind === 'admin' ? 'ADMIN' : 'STUDENT';
   const items = kind === 'admin' ? ADMIN : STUDENT;
-  const { data: ov } = useQuery<{ unread: number }>(kind === 'student' && user?.role === 'STUDENT' ? `/me/overview?locale=${locale}` : null);
+  const { data: ov, reload: reloadOv } = useQuery<{ unread: number }>(kind === 'student' && user?.role === 'STUDENT' ? `/me/overview?locale=${locale}` : null);
 
   useEffect(() => {
     if (user === null) router.replace('/login');
@@ -78,17 +91,24 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
   const dot = (i: Item) => i.dot && (ov?.unread ?? 0) > 0;
 
   const NavList = ({ big = false }: { big?: boolean }) => (
-    <ul className="space-y-1">
-      {items.map((i) => (
-        <li key={i.key}>
-          <Link href={i.href} aria-current={active(i.href) ? 'page' : undefined}
-            className={`relative flex items-center gap-3 rounded-xl px-3 ${big ? 'h-12' : 'h-10'} text-sm font-semibold transition ${active(i.href) ? 'bg-accent text-primary-600' : 'text-navy/80 hover:bg-canvas'}`}>
-            <Icon name={i.icon} /> {t(i.key)}
-            {dot(i) && <span className="ml-auto h-2 w-2 rounded-full bg-red-500" aria-label={`${ov?.unread}`} />}
-          </Link>
-        </li>
+    <div>
+      {(kind === 'admin' ? [{ t: ['', '', ''] as [string, string, string], keys: items.map((i) => i.key) }] : GROUPS).map((g, gi) => (
+        <div key={gi}>
+          {g.t[0] && <p className="mx-2 mb-1 mt-4 text-xs font-bold uppercase tracking-wide text-muted/80">{L(...g.t)}</p>}
+          <ul className="space-y-1">
+            {g.keys.map((k) => items.find((i) => i.key === k)!).map((i) => (
+              <li key={i.key}>
+                <Link href={i.href} aria-current={active(i.href) ? 'page' : undefined}
+                  className={`relative flex items-center gap-3 rounded-xl px-3 ${big ? 'h-12' : 'h-10'} text-sm font-semibold transition ${active(i.href) ? 'bg-accent text-primary-600' : 'text-navy/80 hover:bg-canvas'}`}>
+                  <Icon name={i.icon} /> {t(i.key)}
+                  {dot(i) && <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white" aria-label={`${ov?.unread}`}>{ov?.unread}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </div>
   );
   const Foot = () => (
     <div className="space-y-3 border-t border-navy/10 p-4">
@@ -99,10 +119,12 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
       </div>
     </div>
   );
-  const Brand = () => <Link href="/" className="font-head text-xl font-extrabold text-navy"><span className="text-primary">●</span> {BRAND.name}{kind === 'admin' && <span className="ml-2 rounded-md bg-navy px-1.5 py-0.5 align-middle text-[10px] text-white">ADMIN</span>}</Link>;
+  const Brand = () => <Link href="/" className="flex shrink-0 items-center gap-2 font-head text-xl font-extrabold text-navy" aria-label={BRAND.name}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/img/logo-mark.png" alt="" width={32} height={32} className="h-8 w-8 shrink-0" /><span className="hidden min-[400px]:inline">{BRAND.name}</span>{kind === 'admin' && <span className="ml-2 rounded-md bg-navy px-1.5 py-0.5 align-middle text-[10px] text-white">ADMIN</span>}</Link>;
 
   return (
+    <ToastProvider><LockGate>
     <div className="min-h-screen bg-canvas lg:pl-64">
+      <OfflineBar />
       {/* Kompyuter: chap menyu */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-navy/10 bg-white lg:flex">
         <div className="flex h-16 items-center px-5"><Brand /></div>
@@ -119,15 +141,10 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
           <input className="input !h-10 !pl-10" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('search')} aria-label={t('search')} />
         </form>
         <div className="ml-auto flex items-center gap-2">
-          <PwaClient />
-          <LangSwitch />
-          <Link href="/app/notifications" className="relative grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" aria-label={t('notifications')}>
-            <Icon name="bell" />{(ov?.unread ?? 0) > 0 && <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{ov!.unread > 99 ? '99+' : ov!.unread}</span>}
-          </Link>
-          <Link href="/app/profile" className="hidden items-center gap-2 rounded-xl px-1.5 py-1 hover:bg-canvas sm:flex" aria-label={t('profile')}>
-            <UserAvatar user={user} />
-            <span className="hidden max-w-[120px] truncate text-sm font-semibold text-navy xl:block">{user.firstName}</span>
-          </Link>
+          <span className="hidden md:block"><PwaClient /></span>
+          <span className="hidden md:block"><LangSwitch /></span>
+          {kind === 'student' && <NotificationBell unread={ov?.unread ?? 0} onChange={reloadOv} />}
+          <ProfileMenu admin={kind === 'admin'} profileHref="/app/profile" settingsHref="/app/settings" />
         </div>
       </header>
 
@@ -136,8 +153,8 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t('menu')}>
           <button className="absolute inset-0 bg-navy/40" onClick={() => setOpen(false)} aria-label="close" />
           <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-white shadow-2xl">
-            <div className="flex h-14 items-center justify-between px-4"><Brand /><button className="grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" onClick={() => setOpen(false)} aria-label="close"><Icon name="x" /></button></div>
-            <nav className="flex-1 overflow-y-auto px-3 py-2"><NavList big /></nav>
+            <DrawerHead onClose={() => setOpen(false)} />
+            <nav className="flex-1 overflow-y-auto px-3 pb-2"><NavList big /></nav>
             <Foot />
           </div>
         </div>
@@ -157,5 +174,6 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
         <button onClick={() => setOpen(true)} className="flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-muted"><Icon name="menu" className="h-5 w-5" />{t('more')}</button>
       </nav>
     </div>
+    </LockGate></ToastProvider>
   );
 }

@@ -194,7 +194,7 @@ export function useTable(init: { sort: string; dir?: 'asc' | 'desc'; limit?: num
 
 export function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
   return (
-    <div className="relative min-w-0 flex-1 sm:max-w-sm">
+    <div className="relative w-full min-w-0 sm:w-auto sm:min-w-[220px] sm:max-w-sm sm:flex-1">
       <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"><Icon name="search" className="h-[18px] w-[18px]" /></span>
       <input className="input !pl-10" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} aria-label={placeholder} />
     </div>

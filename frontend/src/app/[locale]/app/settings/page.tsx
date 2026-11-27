@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { api, useQuery } from '@/lib/client';
 import { ErrorBox, Notice, PageHead, Spinner, useErr } from '@/components/ui';
+import LockSettings from '@/components/LockSettings';
 import { Tabs, useL } from '@/components/admin/kit';
 import PwaClient from '@/components/PwaClient';
 import LangSwitch from '@/components/LangSwitch';
@@ -51,6 +52,7 @@ export default function Settings() {
       )}
       {tab === 'security' && (
         <div className="space-y-5">
+          <Card title={L('PIN-kod va barmoq izi', 'PIN-код и отпечаток', 'PIN & fingerprint')}><LockSettings /></Card>
           <Card title={L("Parolni o'zgartirish", 'Смена пароля', 'Change password')}><PasswordForm /></Card>
           <Card title={L('Faol qurilmalar', 'Активные устройства', 'Active devices')} hint={L("Hisobingizga kirgan qurilmalar. Notanish qurilmani chiqarib yuboring.", 'Устройства, с которых выполнен вход. Завершите незнакомые сеансы.', 'Devices signed in to your account. End any you do not recognise.')}><SessionsList /></Card>
         </div>

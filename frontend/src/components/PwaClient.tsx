@@ -7,7 +7,7 @@ interface BIPEvent extends Event { prompt: () => Promise<void>; userChoice: Prom
 
 /** Service worker ro'yxatdan o'tkazadi. "Ilovani o'rnatish" tugmasi HAR DOIM ko'rinadi (ilova allaqachon o'rnatilgan bo'lsa — yo'q).
  *  Brauzer o'rnatish oynasini bersa — to'g'ridan-to'g'ri ochiladi, bo'lmasa (iOS, Firefox...) qisqa yo'riqnoma chiqadi. */
-export default function PwaClient({ className = '' }: { className?: string }) {
+export default function PwaClient({ className = '', full = false }: { className?: string; full?: boolean }) {
   const t = useTranslations('nav');
   const [evt, setEvt] = useState<BIPEvent | null>(null);
   const [ios, setIos] = useState(false);
@@ -35,11 +35,11 @@ export default function PwaClient({ className = '' }: { className?: string }) {
   if (installed) return null;
   return (
     <div className={`relative ${className}`}>
-      <button type="button" className="inline-flex h-10 items-center gap-2 rounded-xl border border-primary/30 bg-accent px-3 text-sm font-semibold text-primary hover:bg-primary hover:text-white" aria-label={t('install')} title={t('install')}
+      <button type="button" className={`inline-flex h-10 items-center gap-2 rounded-xl ${full ? 'w-full justify-center' : ''} border border-primary/30 bg-accent px-3 text-sm font-semibold text-primary hover:bg-primary hover:text-white`} aria-label={t('install')} title={t('install')}
         onClick={async () => { if (evt) { await evt.prompt(); setEvt(null); } else setHint((h) => !h); }}>
-        <Icon name="download" className="h-[18px] w-[18px]" /><span className="hidden whitespace-nowrap md:inline">{t('install')}</span>
+        <Icon name="download" className="h-[18px] w-[18px]" /><span className={`whitespace-nowrap ${full ? '' : 'hidden md:inline'}`}>{t('install')}</span>
       </button>
-      {hint && <p role="status" className="absolute right-0 top-12 z-50 w-64 rounded-xl border border-navy/10 bg-white p-3 text-xs leading-relaxed text-navy shadow-card">{ios ? t('iosHint') : t('installHint')}</p>}
+      {hint && <p role="status" className={`${full ? 'mt-2' : 'absolute right-0 top-12 z-50'} w-64 max-w-full rounded-xl border border-navy/10 bg-white p-3 text-xs leading-relaxed text-navy shadow-card`}>{ios ? t('iosHint') : t('installHint')}</p>}
     </div>
   );
 }

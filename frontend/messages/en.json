@@ -244,7 +244,7 @@
     "admin_cannot_self_delete": "An admin account can't be deleted"
   },
   "shell": {
-    "overview": "Overview",
+    "overview": "Home",
     "explore": "Explore grants",
     "recommended": "Recommended",
     "saved": "Saved",
