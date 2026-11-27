@@ -8,7 +8,7 @@ export function ProgramCard({ p }: { p: Program }) {
   const k = useTranslations('kind');
   const locale = useLocale();
   return (
-    <article className="card flex flex-col gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+    <article className="card flex min-w-0 flex-col gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex items-center justify-between gap-2">
         <span className="chip">{k(p.kind)}</span>
         {p.countryCode && <span className="flex items-center gap-2 text-xs text-muted"><Flag code={p.countryCode} className="h-4 w-6" />{countryName(p.country ?? undefined, locale)}</span>}
@@ -31,7 +31,7 @@ export function ProgramCard({ p }: { p: Program }) {
 export function CountryTile({ c }: { c: CountryT }) {
   const t = useTranslations('countries');
   return (
-    <Link href={`/countries/${c.code}`} className="card group flex flex-col gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+    <Link href={`/countries/${c.code}`} className="card group flex min-w-0 flex-col gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex items-center gap-3">
         <Flag code={c.code} className="h-8 w-12" />
         <h3 className="text-lg font-bold group-hover:text-primary">{c.name}</h3>
@@ -57,7 +57,7 @@ export function StoryCard({ s }: { s: Story }) {
   const t = useTranslations('stories');
   const locale = useLocale();
   return (
-    <article className="card flex flex-col gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+    <article className="card flex min-w-0 flex-col gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex items-center gap-3">
         <Avatar name={s.name} />
         <div className="min-w-0">

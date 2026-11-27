@@ -18,7 +18,7 @@
   "home": {
     "title": "Ta'limingiz uchun dunyo miqyosidagi imkoniyatlar",
     "sub": "Stipendiya, grant va xalqaro ta'lim dasturlarini bir joyda toping, ariza bering va orzu qilgan universitetingizda o'qing.",
-    "search": "Grant yoki tashkilot nomi",
+    "search": "Grant yoki dastur nomi",
     "go": "Qidirish",
     "browse": "Grantlarni ko'rish",
     "demoNote": "Ba'zi ma'lumotlar namuna: muddatlarni rasmiy saytdan tekshiring.",
@@ -85,7 +85,10 @@
     "demo": "NAMUNA",
     "save": "Saqlash",
     "saved": "Saqlangan",
-    "loginToSave": "Saqlash uchun kiring"
+    "loginToSave": "Saqlash uchun kiring",
+    "active": "Faol",
+    "closed": "Yopilgan",
+    "deadlineLabel": "Ariza muddati:"
   },
   "detail": {
     "official": "Rasmiy saytda ariza berish",

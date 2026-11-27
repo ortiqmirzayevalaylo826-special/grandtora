@@ -18,12 +18,12 @@
   "home": {
     "title": "World-class opportunities for your education",
     "sub": "Find scholarships, grants and international education programmes in one place, apply and study at the university of your dreams.",
-    "search": "Grant or organisation name",
+    "search": "Grant or program name",
     "go": "Search",
     "browse": "Browse grants",
     "demoNote": "Some data are samples: check deadlines on the official website.",
     "country": "Country",
-    "level": "Study level",
+    "level": "Level",
     "register": "Sign up",
     "popularQ": "Popular searches:",
     "statGrants": "Active grants",
@@ -85,7 +85,10 @@
     "demo": "SAMPLE",
     "save": "Save",
     "saved": "Saved",
-    "loginToSave": "Log in to save"
+    "loginToSave": "Log in to save",
+    "active": "Active",
+    "closed": "Closed",
+    "deadlineLabel": "Deadline:"
   },
   "detail": {
     "official": "Apply on the official site",

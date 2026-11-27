@@ -94,7 +94,7 @@ export default async function Catalog({ params, searchParams }: { params: Promis
           </form>
         </details>
 
-        <div>
+        <div className="min-w-0">
           <p className="mb-4 text-sm text-muted">{t('catalog.found', { n: data?.total ?? 0 })}</p>
           {data && data.items.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2">{data.items.map((s) => <ScholarshipCard key={s.id} s={s} />)}</div>
