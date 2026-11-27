@@ -423,7 +423,7 @@ export class PanelController {
     const c = await this.db.complaint.update({ where: { id }, data: { ...(d.status ? { status: d.status } : {}), ...(d.resolution !== undefined ? { resolution: d.resolution.trim() } : {}), ...(closing ? { resolvedById: a.id, resolvedAt: new Date() } : {}) } });
     await this.audit(a, `COMPLAINT_${d.status ?? 'EDIT'}`, 'Complaint', id, req);
     if (closing) {
-      await this.db.notification.create({ data: { userId: cur.reporterId, type: 'SYSTEM', dedupeKey: `cmp:${id}:${Date.now()}`, payload: { title: `#${cur.num} · ${cur.subject}`, body: c.resolution ?? '' } } }).catch(() => undefined);
+      await this.db.notification.create({ data: { userId: cur.reporterId, type: 'SYSTEM', dedupeKey: `cmp:${id}:${Date.now()}`, payload: { kind: 'complaint', title: `#${cur.num} · ${cur.subject}`, body: c.resolution ?? '', link: '/app/help?tab=complain' } } }).catch(() => undefined);
     }
     return c;
   }
@@ -448,8 +448,12 @@ export class PanelController {
     return c;
   }
   @Post('chat/conversations/:id/messages') @HttpCode(200) async send(@CurrentUser() a: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body() d: MsgDto) {
-    if (!(await this.db.conversation.findUnique({ where: { id } }))) throw new NotFoundException();
+    const conv = await this.db.conversation.findUnique({ where: { id } });
+    if (!conv) throw new NotFoundException();
     const m = await this.db.chatMessage.create({ data: { conversationId: id, senderId: a.id, fromAdmin: true, body: d.body.trim() } });
+    // talabaga bildirishnoma (bosilsa chatga o'tadi); o'qilmagan chat bildirishnomasi bo'lsa, yangisi yaratilmaydi
+    const has = await this.db.notification.findFirst({ where: { userId: conv.studentId, readAt: null, dedupeKey: { startsWith: 'chat:' } } });
+    if (!has) await this.db.notification.create({ data: { userId: conv.studentId, type: 'ADMIN_MESSAGE', dedupeKey: `chat:${id}:${Date.now()}`, payload: { kind: 'chat', body: d.body.trim().slice(0, 160), link: '/app/messages' } } }).catch(() => undefined);
     await this.db.conversation.update({ where: { id }, data: { lastMessageAt: new Date(), archived: false } });
     return m;
   }
@@ -469,7 +473,7 @@ export class PanelController {
   async broadcast(@CurrentUser() a: AuthUser, @Body() d: BroadcastDto, @Req() req: any) {
     const students = await this.db.user.findMany({ where: { role: 'STUDENT', blockedAt: null, emailVerifiedAt: { not: null } }, select: { id: true } });
     const stamp = Date.now();
-    await this.db.notification.createMany({ data: students.map((s) => ({ userId: s.id, type: 'ADMIN_MESSAGE' as const, dedupeKey: `bc:${stamp}:${s.id}`, payload: { title: d.title.trim(), body: d.body.trim() } })) });
+    await this.db.notification.createMany({ data: students.map((s) => ({ userId: s.id, type: 'ADMIN_MESSAGE' as const, dedupeKey: `bc:${stamp}:${s.id}`, payload: { kind: 'broadcast', title: d.title.trim(), body: d.body.trim() } })) });
     await this.audit(a, 'BROADCAST', 'Broadcast', undefined, req, { title: d.title, recipients: students.length });
     return { recipients: students.length };
   }

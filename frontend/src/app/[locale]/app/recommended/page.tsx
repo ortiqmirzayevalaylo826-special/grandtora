@@ -42,7 +42,7 @@ export default function Recommended() {
                 </div>
               }>
               <button className={`btn h-9 px-3 text-xs ${isSaved(s.id) ? 'btn-primary' : 'btn-ghost'}`} onClick={() => toggle(s.id)} aria-pressed={isSaved(s.id)}>♥</button>
-              <Link href={`/scholarships/${s.slug}`} className="btn btn-ghost h-9 px-3 text-xs">→</Link>
+              <Link href={`/app/grants/${s.slug}`} className="btn btn-ghost h-9 px-3 text-xs">→</Link>
             </GrantItem>
           ))}
         </div>

@@ -12,7 +12,7 @@ export default function GrantItem({ s, children, aside }: { s: any; children?: R
   return (
     <article className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1">
-        <Link href={`/scholarships/${s.slug}`} className="block truncate text-base font-bold text-navy hover:text-primary">{s.tr?.title ?? s.slug}</Link>
+        <Link href={`/app/grants/${s.slug}`} className="block truncate text-base font-bold text-navy hover:text-primary">{s.tr?.title ?? s.slug}</Link>
         <p className="mt-0.5 truncate text-sm text-muted">{s.organization} · {countryName(s.country, locale)}</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="chip">{t(`funding.${s.funding}`)}</span>

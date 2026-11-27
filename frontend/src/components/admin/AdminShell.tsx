@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@/lib/client';
 import LangSwitch from '@/components/LangSwitch';
 import PwaClient from '@/components/PwaClient';
+import UserAvatar from '@/components/UserAvatar';
 import { Icon, Spinner } from '@/components/ui';
 import { Avatar, ToastProvider, useL } from './kit';
 
@@ -129,7 +130,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </div>
             <div className="relative">
               <button className="flex h-10 items-center gap-2 rounded-xl px-1.5 hover:bg-canvas sm:pr-2" onClick={() => { setMenu((v) => !v); setBell(false); }} aria-expanded={menu} aria-label={L('Profil', 'Профиль', 'Profile')}>
-                <Avatar name={name} /><span className="hidden max-w-[120px] truncate text-sm font-semibold sm:block">{user.firstName || 'Admin'}</span>
+                <UserAvatar user={user} /><span className="hidden max-w-[120px] truncate text-sm font-semibold sm:block">{user.firstName || 'Admin'}</span>
               </button>
               {menu && (
                 <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#E5E7EB] bg-white p-2 shadow-2xl">

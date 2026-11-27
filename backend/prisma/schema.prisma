@@ -100,6 +100,8 @@ model User {
   failedLogins    Int       @default(0)
   lockedUntil     DateTime?
   emailReminders  Boolean   @default(true)
+  avatarKey       String?
+  avatarMime      String?
   lastActiveAt    DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

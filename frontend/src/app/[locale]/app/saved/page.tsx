@@ -24,7 +24,7 @@ export default function Saved() {
                 {tracked[s.id] ? '✓' : t('track')}
               </button>
               <button className="btn btn-ghost h-9 px-3 text-xs" onClick={async () => { await api(`/me/saved/${s.id}`, { method: 'DELETE' }); setData(data.filter((x) => x.id !== s.id)); }}>{t('remove')}</button>
-              <Link href={`/scholarships/${s.slug}`} className="btn btn-primary h-9 px-3 text-xs">→</Link>
+              <Link href={`/app/grants/${s.slug}`} className="btn btn-primary h-9 px-3 text-xs">→</Link>
             </GrantItem>
           ))}
         </div>

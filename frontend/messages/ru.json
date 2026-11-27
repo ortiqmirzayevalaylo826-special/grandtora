@@ -229,6 +229,7 @@
     "weak_password": "Пароль: от 8 символов, заглавные и строчные буквы, цифра и символ",
     "file_type_not_allowed": "Допустимы только PDF, JPG или PNG",
     "file_required": "Выберите файл",
+    "image_type_not_allowed": "Можно загрузить только JPG или PNG",
     "too_many_documents": "Достигнут лимит документов (20)",
     "already_reviewed": "Вы уже оставили отзыв",
     "slug_taken": "Этот slug уже занят",

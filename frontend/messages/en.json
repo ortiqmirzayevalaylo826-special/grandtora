@@ -229,6 +229,7 @@
     "weak_password": "Password: 8+ characters with upper and lower case, a digit and a symbol",
     "file_type_not_allowed": "Only PDF, JPG or PNG files are allowed",
     "file_required": "Choose a file",
+    "image_type_not_allowed": "Only JPG or PNG images are allowed",
     "too_many_documents": "Document limit (20) reached",
     "already_reviewed": "You have already reviewed this",
     "slug_taken": "This slug is already taken",

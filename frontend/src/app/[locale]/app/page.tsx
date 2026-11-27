@@ -45,7 +45,7 @@ export default function Overview() {
         <img src="/img/campus.jpg" alt="" className="pointer-events-none absolute inset-y-0 right-0 -z-10 hidden h-full w-1/3 object-cover opacity-90 md:block" style={{ maskImage: 'linear-gradient(to right, transparent, #000 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent, #000 45%)' }} />
         <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">{t('hello', { name: user?.firstName ?? '' })} <span aria-hidden>👋</span></h1>
         <p className="mt-2 max-w-md text-sm text-muted sm:text-base">{L("O'zingizga mos grantlar va dasturlarni kashf eting.", 'Находите гранты и программы, подходящие именно вам.', 'Discover grants and programs that fit you.')}</p>
-        <Link href="/scholarships" className="btn btn-primary mt-5 inline-flex">{L("Yangi grantlarni ko'rish", 'Смотреть новые гранты', 'Browse new grants')} <Icon name="arrow" className="h-4 w-4" /></Link>
+        <Link href="/app/grants" className="btn btn-primary mt-5 inline-flex">{L("Yangi grantlarni ko'rish", 'Смотреть новые гранты', 'Browse new grants')} <Icon name="arrow" className="h-4 w-4" /></Link>
       </section>
 
       {/* Statistika */}
@@ -70,7 +70,7 @@ export default function Overview() {
             {rec.data.slice(0, 3).map((s: any) => {
               const d = daysLeft(s.deadline); const p = pill(d, s.rolling);
               return (
-                <Link key={s.id} href={`/scholarships/${s.slug}`} className="card flex min-w-[78%] snap-start flex-col gap-3 p-4 transition hover:-translate-y-0.5 sm:min-w-0">
+                <Link key={s.id} href={`/app/grants/${s.slug}`} className="card flex min-w-[78%] snap-start flex-col gap-3 p-4 transition hover:-translate-y-0.5 sm:min-w-0">
                   <div className="flex items-center gap-3"><Flag code={s.countryCode} className="h-8 w-12 shrink-0 rounded" /><div className="min-w-0"><p className="truncate font-bold text-navy">{s.tr?.title ?? s.slug}</p><p className="truncate text-xs text-muted">{s.organization} · {countryName(s.country, locale)}</p></div></div>
                   <div className="flex flex-wrap gap-1.5">{(s.levels ?? []).slice(0, 3).map((l: string) => <span key={l} className="chip">{c(`level.${l}`)}</span>)}<span className="chip">{c(`funding.${s.funding}`)}</span></div>
                   {p.text && <span className={`mt-auto w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${p.cls}`}>{p.text}</span>}
@@ -92,7 +92,7 @@ export default function Overview() {
                 return (
                   <li key={s.id} className="flex items-center gap-3 py-3">
                     <Flag code={s.countryCode} className="h-6 w-9 shrink-0 rounded" />
-                    <div className="min-w-0 flex-1"><Link href={`/scholarships/${s.slug}`} className="block truncate font-semibold text-navy hover:text-primary">{s.tr?.title ?? s.slug}</Link><p className="truncate text-xs text-muted">{L('Ariza topshirish muddati', 'Срок подачи заявки', 'Application deadline')}</p></div>
+                    <div className="min-w-0 flex-1"><Link href={`/app/grants/${s.slug}`} className="block truncate font-semibold text-navy hover:text-primary">{s.tr?.title ?? s.slug}</Link><p className="truncate text-xs text-muted">{L('Ariza topshirish muddati', 'Срок подачи заявки', 'Application deadline')}</p></div>
                     {p.text && <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${p.cls}`}>{p.text}</span>}
                   </li>
                 );

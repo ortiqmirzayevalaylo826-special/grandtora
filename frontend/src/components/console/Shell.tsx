@@ -6,6 +6,7 @@ import { BRAND } from '@/brand';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@/lib/client';
 import LangSwitch from '../LangSwitch';
+import UserAvatar from '../UserAvatar';
 import PwaClient from '../PwaClient';
 import { Icon, Spinner } from '../ui';
 
@@ -13,7 +14,7 @@ interface Item { href: string; key: string; icon: string; dot?: boolean }
 
 const STUDENT: Item[] = [
   { href: '/app', key: 'overview', icon: 'home' },
-  { href: '/scholarships', key: 'explore', icon: 'search' },
+  { href: '/app/grants', key: 'explore', icon: 'search' },
   { href: '/app/recommended', key: 'recommended', icon: 'star' },
   { href: '/app/saved', key: 'saved', icon: 'heart' },
   { href: '/app/applications', key: 'applications', icon: 'list' },
@@ -113,7 +114,7 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
       <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-navy/10 bg-white/95 px-3 backdrop-blur sm:px-6">
         <button className="grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas lg:hidden" onClick={() => setOpen(true)} aria-label={t('menu')} aria-expanded={open}><Icon name="menu" /></button>
         <span className="lg:hidden"><Brand /></span>
-        <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) router.push(`/scholarships?q=${encodeURIComponent(q.trim())}`); }} className="relative hidden min-w-0 max-w-md flex-1 md:block" role="search">
+        <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) router.push(`/app/grants?q=${encodeURIComponent(q.trim())}`); }} className="relative hidden min-w-0 max-w-md flex-1 md:block" role="search">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"><Icon name="search" className="h-[18px] w-[18px]" /></span>
           <input className="input !h-10 !pl-10" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('search')} aria-label={t('search')} />
         </form>
@@ -124,7 +125,7 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
             <Icon name="bell" />{(ov?.unread ?? 0) > 0 && <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{ov!.unread > 99 ? '99+' : ov!.unread}</span>}
           </Link>
           <Link href="/app/profile" className="hidden items-center gap-2 rounded-xl px-1.5 py-1 hover:bg-canvas sm:flex" aria-label={t('profile')}>
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-sm font-bold text-white">{(user.firstName?.[0] ?? user.email[0]).toUpperCase()}</span>
+            <UserAvatar user={user} />
             <span className="hidden max-w-[120px] truncate text-sm font-semibold text-navy xl:block">{user.firstName}</span>
           </Link>
         </div>

@@ -7,7 +7,7 @@ import type { Response } from 'express';
 import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import { ApplicationStatus, StudyLevel } from '@prisma/client';
-import { IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.module';
 import { StorageService } from '../storage/storage.module';
 import { AuthUser, CurrentUser, JwtAuthGuard } from '../common/auth';
@@ -37,6 +37,11 @@ class AppDto {
 }
 class ReportDto { @IsString() @MinLength(5) @MaxLength(500) text: string }
 class ReviewDto { @IsInt() @Min(1) @Max(5) stars: number; @IsString() @MinLength(10) @MaxLength(1000) text: string }
+class AccountDto {
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(60) firstName?: string;
+  @IsOptional() @IsString() @MaxLength(60) lastName?: string;
+  @IsOptional() @IsIn(['uz', 'ru', 'en']) locale?: 'uz' | 'ru' | 'en';
+}
 class SettingsDto { @IsOptional() @IsBoolean() emailReminders?: boolean }
 class PasswordDto { @IsString() @MaxLength(72) current: string; @Matches(PW, { message: 'weak_password' }) next: string }
 class DeleteDto { @IsString() @MaxLength(72) password: string }
@@ -177,7 +182,67 @@ export class MeController {
     const sch = ids.length ? await this.db.scholarship.findMany({ where: { id: { in: ids } }, include: { translations: true } }) : [];
     return rows.map((r) => ({ ...r, scholarship: sch.find((s) => s.id === (r.payload as any)?.scholarshipId) ? this.sch.present(sch.find((s) => s.id === (r.payload as any)?.scholarshipId)) : null }));
   }
+  @Post('notifications/:id/read') async readOne(@CurrentUser() u: AuthUser, @Param('id', ParseUUIDPipe) id: string) { await this.db.notification.updateMany({ where: { id, userId: u.id, readAt: null }, data: { readAt: new Date() } }); return { ok: true }; }
   @Post('notifications/read') async readAll(@CurrentUser() u: AuthUser) { await this.db.notification.updateMany({ where: { userId: u.id, readAt: null }, data: { readAt: new Date() } }); return { ok: true }; }
+
+  // ---- hisob, rasm, qurilmalar, ma'lumotni yuklab olish ----
+  private pub(r: { id: string; email: string; role: string; firstName: string; lastName: string; locale: string; avatarKey: string | null }) {
+    return { id: r.id, email: r.email, role: r.role, firstName: r.firstName, lastName: r.lastName, locale: r.locale, avatar: r.avatarKey ? r.avatarKey.split('/').pop() : null };
+  }
+  @Patch('account') async account(@CurrentUser() u: AuthUser, @Body() d: AccountDto) {
+    const r = await this.db.user.update({ where: { id: u.id }, data: { ...(d.firstName !== undefined ? { firstName: d.firstName.trim() } : {}), ...(d.lastName !== undefined ? { lastName: d.lastName.trim() } : {}), ...(d.locale ? { locale: d.locale } : {}) } });
+    return this.pub(r);
+  }
+  @Post('avatar') @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 2 * 1024 * 1024, files: 1 } }))
+  async setAvatar(@CurrentUser() u: AuthUser, @UploadedFile() file?: Express.Multer.File) {
+    if (!file) throw new BadRequestException('file_required');
+    const kind = sniff(file.buffer);
+    if (!kind || !kind.mime.startsWith('image/')) throw new BadRequestException('image_type_not_allowed');
+    const key = `avatars/${u.id}/${randomUUID()}.${kind.ext}`;
+    await this.store.put(key, file.buffer, kind.mime);
+    const old = await this.db.user.findUnique({ where: { id: u.id }, select: { avatarKey: true } });
+    const r = await this.db.user.update({ where: { id: u.id }, data: { avatarKey: key, avatarMime: kind.mime } });
+    if (old?.avatarKey) await this.store.remove(old.avatarKey).catch(() => undefined);
+    return this.pub(r);
+  }
+  @Get('avatar') async avatar(@CurrentUser() u: AuthUser, @Res() res: Response) {
+    const r = await this.db.user.findUnique({ where: { id: u.id }, select: { avatarKey: true, avatarMime: true } });
+    if (!r?.avatarKey) throw new NotFoundException();
+    const buf = await this.store.get(r.avatarKey);
+    res.setHeader('Content-Type', r.avatarMime ?? 'image/jpeg');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, max-age=86400');
+    res.send(buf);
+  }
+  @Delete('avatar') async delAvatar(@CurrentUser() u: AuthUser) {
+    const r = await this.db.user.findUnique({ where: { id: u.id }, select: { avatarKey: true } });
+    if (r?.avatarKey) await this.store.remove(r.avatarKey).catch(() => undefined);
+    const x = await this.db.user.update({ where: { id: u.id }, data: { avatarKey: null, avatarMime: null } });
+    return this.pub(x);
+  }
+  @Get('sessions') sessions(@CurrentUser() u: AuthUser) {
+    return this.db.refreshToken.findMany({ where: { userId: u.id, revokedAt: null, expiresAt: { gt: new Date() } }, orderBy: { createdAt: 'desc' }, take: 20, select: { id: true, userAgent: true, createdAt: true } });
+  }
+  @Delete('sessions/:id') async endSession(@CurrentUser() u: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    await this.db.refreshToken.updateMany({ where: { id, userId: u.id, revokedAt: null }, data: { revokedAt: new Date() } });
+    return { ok: true };
+  }
+  @Delete('sessions') async endAllSessions(@CurrentUser() u: AuthUser) {
+    const r = await this.db.refreshToken.updateMany({ where: { userId: u.id, revokedAt: null }, data: { revokedAt: new Date() } });
+    return { ended: r.count };
+  }
+  @Get('export') async exportData(@CurrentUser() u: AuthUser) {
+    const [user, profile, saved, apps, docs, reviews, complaints] = await Promise.all([
+      this.db.user.findUnique({ where: { id: u.id }, select: { email: true, firstName: true, lastName: true, locale: true, createdAt: true, emailReminders: true } }),
+      this.db.profile.findUnique({ where: { userId: u.id } }),
+      this.db.savedScholarship.findMany({ where: { userId: u.id }, include: { scholarship: { select: { slug: true, organization: true } } } }),
+      this.db.application.findMany({ where: { userId: u.id }, include: { scholarship: { select: { slug: true } } } }),
+      this.db.document.findMany({ where: { userId: u.id }, select: { name: true, mime: true, sizeBytes: true, createdAt: true } }),
+      this.db.review.findMany({ where: { userId: u.id }, select: { stars: true, text: true, status: true, createdAt: true } }),
+      this.db.complaint.findMany({ where: { reporterId: u.id }, select: { num: true, kind: true, subject: true, text: true, status: true, resolution: true, createdAt: true } }),
+    ]);
+    return { exportedAt: new Date().toISOString(), user, profile, saved: saved.map((x) => x.scholarship.slug), applications: apps.map((a: any) => ({ grant: a.scholarship.slug, status: a.status, note: a.note, createdAt: a.createdAt })), documents: docs, reviews, complaints };
+  }
 
   // ---- hujjatlar (PDF/JPG/PNG, 5 MB gacha) ----
   @Get('documents') documents(@CurrentUser() u: AuthUser) {

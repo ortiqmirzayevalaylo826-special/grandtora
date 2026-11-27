@@ -12,7 +12,7 @@ export default function Help() {
   const L = useL();
   const f = useDateFmt();
   const err = useErr();
-  const [tab, setTab] = useState<'guide' | 'complain'>('guide');
+  const [tab, setTab] = useState<'guide' | 'complain'>(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === 'complain' ? 'complain' : 'guide'));
   const mine = useQuery<Mine[]>(tab === 'complain' ? '/me/complaints' : null);
   const [form, setForm] = useState({ kind: 'OTHER', targetEmail: '', subject: '', text: '' });
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);

@@ -68,7 +68,7 @@ export default function CalendarPage() {
       </div>
       <div className="mt-5 space-y-2">
         {monthItems.length === 0 ? <Empty text={t('empty')} /> : monthItems.map((s) => (
-          <Link key={s.id} href={`/scholarships/${s.slug}`} className="card flex items-center gap-3 p-3">
+          <Link key={s.id} href={`/app/grants/${s.slug}`} className="card flex items-center gap-3 p-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent font-head text-lg font-extrabold text-primary-600">{Number(s.deadline.slice(8, 10))}</span>
             <span className="min-w-0"><b className="block truncate text-navy">{s.tr?.title ?? s.slug}</b><span className="text-xs text-muted">{s.organization}</span></span>
           </Link>

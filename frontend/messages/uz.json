@@ -229,6 +229,7 @@
     "weak_password": "Parol: kamida 8 belgi, katta va kichik harf, raqam va belgi",
     "file_type_not_allowed": "Faqat PDF, JPG yoki PNG yuklash mumkin",
     "file_required": "Fayl tanlang",
+    "image_type_not_allowed": "Faqat JPG yoki PNG rasm yuklash mumkin",
     "too_many_documents": "Hujjatlar chegarasi (20) to'ldi",
     "already_reviewed": "Siz allaqachon fikr bildirgansiz",
     "slug_taken": "Bu manzil (slug) band",

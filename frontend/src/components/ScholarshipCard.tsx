@@ -5,7 +5,7 @@ import Flag from './Flag';
 import SaveButton from './SaveButton';
 import { Icon } from './ui';
 
-export default function ScholarshipCard({ s }: { s: Scholarship }) {
+export default function ScholarshipCard({ s, base = '/scholarships' }: { s: Scholarship; base?: string }) {
   const t = useTranslations();
   const locale = useLocale();
   const d = daysLeft(s.deadline);
@@ -18,7 +18,7 @@ export default function ScholarshipCard({ s }: { s: Scholarship }) {
         <Flag code={s.countryCode} className="mt-0.5 h-8 w-12" />
         <div className="min-w-0 flex-1">
           <h3 className="line-clamp-2 break-words text-base font-bold leading-snug">
-            <Link href={`/scholarships/${s.slug}`} className="hover:text-primary">{s.tr?.title ?? s.slug}</Link>
+            <Link href={`${base}/${s.slug}`} className="hover:text-primary">{s.tr?.title ?? s.slug}</Link>
           </h3>
           <p className="mt-0.5 truncate text-xs text-muted">{s.organization} · {countryName(s.country, locale)}</p>
         </div>
@@ -38,7 +38,7 @@ export default function ScholarshipCard({ s }: { s: Scholarship }) {
           <span className="truncate">{s.rolling ? t('card.rolling') : s.deadline ? `${t('card.deadlineLabel')} ${date}` : ''}</span>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <Link href={`/scholarships/${s.slug}`} className="btn btn-ghost h-9 px-3 text-xs">{t('card.details')}</Link>
+          <Link href={`${base}/${s.slug}`} className="btn btn-ghost h-9 px-3 text-xs">{t('card.details')}</Link>
           <SaveButton id={s.id} />
         </div>
       </div>

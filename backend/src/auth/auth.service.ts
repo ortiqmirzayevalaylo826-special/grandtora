@@ -164,7 +164,7 @@ export class AuthService {
     await this.db.refreshToken.updateMany({ where: { tokenHash: createHash('sha256').update(token).digest('hex'), revokedAt: null }, data: { revokedAt: new Date() } });
   }
 
-  publicUser(u: User) { return { id: u.id, email: u.email, role: u.role, firstName: u.firstName, lastName: u.lastName, locale: u.locale }; }
+  publicUser(u: User) { return { id: u.id, email: u.email, role: u.role, firstName: u.firstName, lastName: u.lastName, locale: u.locale, avatar: u.avatarKey ? u.avatarKey.split('/').pop() : null }; }
   async me(id: string) {
     const u = await this.db.user.findUnique({ where: { id }, include: { profile: true } });
     if (!u) throw new ForbiddenException();

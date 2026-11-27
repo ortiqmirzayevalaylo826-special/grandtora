@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api, refreshSession } from './client';
 
-export interface AuthUser { id: string; email: string; role: 'STUDENT' | 'ADMIN'; firstName: string; lastName: string; locale: string }
+export interface AuthUser { id: string; email: string; role: 'STUDENT' | 'ADMIN'; firstName: string; lastName: string; locale: string; avatar?: string | null }
 interface Ctx { user: AuthUser | null | undefined; setUser: (u: AuthUser | null) => void; logout: () => Promise<void> }
 const AuthCtx = createContext<Ctx>({ user: undefined, setUser: () => {}, logout: async () => {} });
 export const useAuth = () => useContext(AuthCtx);
