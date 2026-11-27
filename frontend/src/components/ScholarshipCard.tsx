@@ -1,6 +1,8 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Scholarship, countryName, daysLeft } from '@/lib/api';
+import Flag from './Flag';
+import SaveButton from './SaveButton';
 
 export default function ScholarshipCard({ s }: { s: Scholarship }) {
   const t = useTranslations();
@@ -8,11 +10,17 @@ export default function ScholarshipCard({ s }: { s: Scholarship }) {
   const d = daysLeft(s.deadline);
   const urgent = d !== null && d >= 0 && d <= 7;
   return (
-    <article className="card flex flex-col gap-3 p-5">
-      <div>
-        <h3 className="text-lg font-bold leading-snug">{s.tr?.title ?? s.slug}</h3>
-        <p className="mt-1 text-sm text-muted">{s.organization} · {countryName(s.country, locale)}</p>
+    <article className="card group flex flex-col gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Flag code={s.countryCode} className="h-6 w-9 shrink-0" />
+          <p className="truncate text-sm text-muted">{s.organization} · {countryName(s.country, locale)}</p>
+        </div>
+        <SaveButton id={s.id} />
       </div>
+      <h3 className="text-lg font-bold leading-snug">
+        <Link href={`/scholarships/${s.slug}`} className="hover:text-primary">{s.tr?.title ?? s.slug}</Link>
+      </h3>
       <p className="line-clamp-2 text-sm text-ink/80">{s.tr?.summary}</p>
       <div className="flex flex-wrap gap-2">
         <span className="chip">{t(`funding.${s.funding}`)}</span>

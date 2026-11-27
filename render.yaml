@@ -6,7 +6,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm install --include=dev && npx prisma generate --schema backend/prisma/schema.prisma && npx prisma db push --skip-generate --schema backend/prisma/schema.prisma && npm run build -w backend
+    buildCommand: npm install --include=dev && npx prisma generate --schema backend/prisma/schema.prisma && npx prisma db push --skip-generate --schema backend/prisma/schema.prisma && npm run prisma:seed -w backend && npm run build -w backend
     startCommand: node backend/dist/main.js
     healthCheckPath: /api/health
     envVars:
@@ -24,6 +24,15 @@ services:
         generateValue: true
       - key: WEB_ORIGIN
         sync: false          # masalan https://grantora-web.onrender.com
+      # Admin va demo akkauntlar (seed har build'da: mavjudiga tegmaydi, yetishmaganini yaratadi)
+      - key: ADMIN_EMAIL
+        value: ortiqmirzayevalaylo826@gmail.com
+      - key: ADMIN_PASSWORD
+        sync: false          # admin paroli — O'ZINGIZ yozasiz (Render maxfiy maydoni)
+      - key: SEED_DEMO_USERS
+        value: "true"        # kurs/sinov uchun demo akkauntlar; haqiqiy ishga tushirishda "false" qiling
+      - key: DEMO_PASSWORD
+        sync: false          # demo akkauntlar paroli
       - key: COOKIE_SECURE
         value: "true"
       - key: MAIL_PROVIDER

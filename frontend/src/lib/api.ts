@@ -9,9 +9,24 @@ export interface Scholarship {
 }
 export interface Paged<T> { total: number; page: number; limit: number; pages: number; items: T[] }
 
+export interface Program {
+  id: string; slug: string; kind: string; organization: string; countryCode: string | null; officialUrl: string;
+  country?: { code: string; nameUz: string; nameRu: string; nameEn: string } | null;
+  tr: { title?: string; summary?: string; who?: string; duration?: string; funding?: string; req?: string };
+}
+export interface Story {
+  id: string; slug: string; name: string; university: string; countryCode: string | null; program: string; photoUrl: string | null; isSample: boolean;
+  country?: { code: string; nameUz: string; nameRu: string; nameEn: string } | null;
+  tr: { quote?: string; prep?: string; text?: string };
+}
+export interface CountryCard { code: string; name: string; universities: string[]; eduLang: string | null; info: string | null; scholarships: number; programs: number }
+export interface CountryDetail extends Omit<CountryCard, 'scholarships' | 'programs'> { scholarships: Scholarship[]; total: number; programs: Program[] }
+export interface PublicStats { scholarships: number; countries: number; programs: number; students: number }
+
+/** Render bepul rejasida API uxlab qolishi mumkin (birinchi so'rov ~30-50 s): shuning uchun uzoqroq kutamiz. */
 export async function apiGet<T>(path: string): Promise<T | null> {
   try {
-    const r = await fetch(`${BASE}/api${path}`, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
+    const r = await fetch(`${BASE}/api${path}`, { cache: 'no-store', signal: AbortSignal.timeout(25_000) });
     return r.ok ? ((await r.json()) as T) : null;
   } catch {
     return null; // API o'chiq bo'lsa sahifa yiqilmasin

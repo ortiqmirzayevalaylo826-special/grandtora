@@ -58,3 +58,21 @@ HTTPS saytda (Render beradi) Chrome/Edge: manzil satrida «O'rnatish» yoki sayt
 
 > Bepul Render xizmati 15 daqiqa harakatsizlikdan keyin uxlaydi — birinchi ochilish ~30-60 s.
 > `.env` va parollarni HECH QACHON GitHub'ga yuklamang (`.gitignore` da bor).
+
+## Demo akkauntlar (kurs loyihasi uchun)
+
+`SEED_DEMO_USERS=true` bo'lsa, deploy paytida seed quyidagilarni yaratadi (parol: `DEMO_PASSWORD`, standart `Demo#2026pass`):
+
+| Rol | Email | Izoh |
+| --- | --- | --- |
+| ADMIN (haqiqiy) | `ADMIN_EMAIL` (ortiqmirzayevalaylo826@gmail.com) | Parol: Render'dagi `ADMIN_PASSWORD` |
+| ADMIN (demo) | demo.admin@grantora.demo | Admin panelni sinash |
+| STUDENT | demo.student1@grantora.demo | Madina Karimova: profil, saqlanganlar, arizalar, bildirishnomalar |
+| STUDENT | demo.student2@grantora.demo | Jasur Rahimov: bo'sh akkaunt |
+| Bloklangan | demo.blocked@grantora.demo | Kirishda bloklanganlik xabari |
+
+Ishlab chiqarishda `SEED_DEMO_USERS` ni o'chiring.
+
+## Aloqa va ijtimoiy tarmoqlar (frontend env)
+
+`NEXT_PUBLIC_CONTACT_EMAIL`, `NEXT_PUBLIC_CONTACT_PHONE`, `NEXT_PUBLIC_CONTACT_ADDRESS`, `NEXT_PUBLIC_SOCIAL_TELEGRAM`, `NEXT_PUBLIC_SOCIAL_INSTAGRAM` va h.k. Bo'sh qiymatlar saytda ko'rsatilmaydi.

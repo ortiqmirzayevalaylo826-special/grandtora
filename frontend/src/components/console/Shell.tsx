@@ -29,6 +29,7 @@ const ADMIN: Item[] = [
   { href: '/admin/users', key: 'a_users', icon: 'users' },
   { href: '/admin/reports', key: 'a_reports', icon: 'flag' },
   { href: '/admin/reviews', key: 'a_reviews', icon: 'msg' },
+  { href: '/admin/messages', key: 'a_messages', icon: 'msg' },
   { href: '/admin/freshness', key: 'a_fresh', icon: 'refresh' },
   { href: '/admin/catalog', key: 'a_catalog', icon: 'globe' },
   { href: '/admin/audit', key: 'a_audit', icon: 'log' },

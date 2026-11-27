@@ -8,6 +8,12 @@ export const dynamic = 'force-dynamic';
 type SP = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v.join(',') : v ?? '');
 
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'catalog' });
+  return { title: t('title') };
+}
+
 export default async function Catalog({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SP> }) {
   const { locale } = await params;
   const sp = await searchParams;
@@ -15,7 +21,7 @@ export default async function Catalog({ params, searchParams }: { params: Promis
   const t = await getTranslations();
 
   const qs = new URLSearchParams({ locale, limit: '12' });
-  for (const k of ['q', 'countries', 'levels', 'funding', 'deadlineWithinDays', 'sort', 'page']) { const v = one(sp[k]); if (v) qs.set(k, v); }
+  for (const k of ['q', 'countries', 'levels', 'funding', 'deadlineWithinDays', 'sort', 'page', 'lang']) { const v = one(sp[k]); if (v) qs.set(k, v); }
   if (sp.noEssay) qs.set('noEssay', 'true');
   const data = await apiGet<Paged<Scholarship>>(`/scholarships?${qs}`);
   const countries = (await apiGet<{ code: string; nameUz: string; nameRu: string; nameEn: string }[]>('/scholarships/countries')) ?? [];
@@ -25,50 +31,68 @@ export default async function Catalog({ params, searchParams }: { params: Promis
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
+      <nav aria-label="Breadcrumb" className="mb-2 text-xs text-muted"><Link href="/" className="hover:text-primary">{t('nav.home')}</Link> / {t('nav.catalog')}</nav>
       <h1 className="text-3xl font-extrabold">{t('catalog.title')}</h1>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[260px_1fr]">
-        {/* Filtrlar oddiy GET forma: JavaScriptsiz ham ishlaydi, URL ulashiladi, qidiruv robotlari ko'radi */}
-        <form className="card h-fit space-y-5 p-5" method="get">
-          <input className="input" name="q" defaultValue={one(sp.q)} placeholder={t('home.search')} aria-label={t('home.search')} />
-          <fieldset>
-            <legend className="mb-2 text-sm font-bold text-navy">{t('catalog.country')}</legend>
-            <div className="max-h-44 space-y-1.5 overflow-auto pr-1">
-              {countries.map((c) => (
-                <label key={c.code} className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" name="countries" value={c.code} defaultChecked={sel('countries').includes(c.code)} />
-                  {locale === 'ru' ? c.nameRu : locale === 'en' ? c.nameEn : c.nameUz}
+      <div className="mt-6 grid gap-6 lg:grid-cols-[270px_1fr]">
+        {/* Filtrlar oddiy GET forma: JavaScriptsiz ham ishlaydi, URL ulashiladi, qidiruv robotlari ko'radi.
+            Mobilda <details> ichida yig'iladi. */}
+        <details className="lg:open-always group h-fit" open>
+          <summary className="btn btn-ghost mb-3 w-full cursor-pointer list-none lg:hidden">{t('catalog.filters')}</summary>
+          <form className="card space-y-5 p-5" method="get">
+            <input className="input" name="q" defaultValue={one(sp.q)} placeholder={t('home.search')} aria-label={t('home.search')} />
+            <fieldset>
+              <legend className="mb-2 text-sm font-bold text-navy">{t('catalog.country')}</legend>
+              <div className="max-h-44 space-y-1.5 overflow-auto pr-1">
+                {countries.map((c) => (
+                  <label key={c.code} className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="countries" value={c.code} defaultChecked={sel('countries').includes(c.code)} />
+                    {locale === 'ru' ? c.nameRu : locale === 'en' ? c.nameEn : c.nameUz}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend className="mb-2 text-sm font-bold text-navy">{t('catalog.level')}</legend>
+              {['BACHELOR', 'MASTER', 'PHD'].map((l) => (
+                <label key={l} className="mb-1.5 flex items-center gap-2 text-sm">
+                  <input type="checkbox" name="levels" value={l} defaultChecked={sel('levels').includes(l)} /> {t(`level.${l}`)}
                 </label>
               ))}
+            </fieldset>
+            <fieldset>
+              <legend className="mb-2 text-sm font-bold text-navy">{t('catalog.funding')}</legend>
+              {['FULL', 'PARTIAL', 'TUITION', 'LIVING'].map((f) => (
+                <label key={f} className="mb-1.5 flex items-center gap-2 text-sm">
+                  <input type="checkbox" name="funding" value={f} defaultChecked={sel('funding').includes(f)} /> {t(`funding.${f}`)}
+                </label>
+              ))}
+            </fieldset>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="noEssay" value="true" defaultChecked={!!sp.noEssay} /> {t('catalog.noEssay')}</label>
+            <div>
+              <label className="mb-2 block text-sm font-bold text-navy" htmlFor="lg">{t('catalog.lang')}</label>
+              <select id="lg" name="lang" className="input" defaultValue={one(sp.lang)}>
+                <option value="">{t('catalog.any')}</option>
+                {['EN', 'DE', 'TR', 'KO', 'JA', 'FR'].map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
             </div>
-          </fieldset>
-          <fieldset>
-            <legend className="mb-2 text-sm font-bold text-navy">{t('catalog.level')}</legend>
-            {['BACHELOR', 'MASTER', 'PHD'].map((l) => (
-              <label key={l} className="mb-1.5 flex items-center gap-2 text-sm">
-                <input type="checkbox" name="levels" value={l} defaultChecked={sel('levels').includes(l)} /> {t(`level.${l}`)}
-              </label>
-            ))}
-          </fieldset>
-          <fieldset>
-            <legend className="mb-2 text-sm font-bold text-navy">{t('catalog.funding')}</legend>
-            {['FULL', 'PARTIAL', 'TUITION', 'LIVING'].map((f) => (
-              <label key={f} className="mb-1.5 flex items-center gap-2 text-sm">
-                <input type="checkbox" name="funding" value={f} defaultChecked={sel('funding').includes(f)} /> {t(`funding.${f}`)}
-              </label>
-            ))}
-          </fieldset>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="noEssay" value="true" defaultChecked={!!sp.noEssay} /> {t('catalog.noEssay')}</label>
-          <div>
-            <label className="mb-2 block text-sm font-bold text-navy" htmlFor="dl">{t('catalog.deadline')}</label>
-            <select id="dl" name="deadlineWithinDays" className="input" defaultValue={one(sp.deadlineWithinDays)}>
-              <option value="">{t('catalog.any')}</option><option value="30">{t('catalog.d30')}</option><option value="90">{t('catalog.d90')}</option>
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <button className="btn btn-primary flex-1">{t('catalog.apply')}</button>
-            <Link href="/scholarships" className="btn btn-ghost">{t('catalog.reset')}</Link>
-          </div>
-        </form>
+            <div>
+              <label className="mb-2 block text-sm font-bold text-navy" htmlFor="dl">{t('catalog.deadline')}</label>
+              <select id="dl" name="deadlineWithinDays" className="input" defaultValue={one(sp.deadlineWithinDays)}>
+                <option value="">{t('catalog.any')}</option><option value="30">{t('catalog.d30')}</option><option value="90">{t('catalog.d90')}</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-bold text-navy" htmlFor="so">{t('catalog.sortLabel')}</label>
+              <select id="so" name="sort" className="input" defaultValue={one(sp.sort) || 'deadline'}>
+                <option value="deadline">{t('catalog.byDeadline')}</option><option value="new">{t('catalog.byNew')}</option><option value="popular">{t('catalog.byPopular')}</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <button className="btn btn-primary flex-1">{t('catalog.apply')}</button>
+              <Link href="/scholarships" className="btn btn-ghost">{t('catalog.reset')}</Link>
+            </div>
+          </form>
+        </details>
 
         <div>
           <p className="mb-4 text-sm text-muted">{t('catalog.found', { n: data?.total ?? 0 })}</p>

@@ -7,6 +7,8 @@
  */
 import { PrismaClient, StudyLevel, FundingType } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { COUNTRY_INFO, EXTRA_COUNTRIES, PROGRAMS, STORIES } from './seed-data';
+import { demoUsers } from './seed-demo';
 
 const db = new PrismaClient();
 const day = (n: number) => new Date(Date.now() + n * 864e5);
@@ -17,6 +19,7 @@ const COUNTRIES: [string, string, string, string][] = [
   ['JP', 'Yaponiya', 'Япония', 'Japan'], ['HU', 'Vengriya', 'Венгрия', 'Hungary'], ['FR', 'Fransiya', 'Франция', 'France'],
   ['CN', 'Xitoy', 'Китай', 'China'], ['SE', 'Shvetsiya', 'Швеция', 'Sweden'], ['EU', "Yevropa Ittifoqi", 'Европейский союз', 'European Union'],
   ['UZ', "O'zbekiston", 'Узбекистан', 'Uzbekistan'],
+  ...EXTRA_COUNTRIES,
 ];
 const CATEGORIES: [string, string, string, string][] = [
   ['government', 'Davlat granti', 'Государственный грант', 'Government'], ['university', 'Universitet', 'Университет', 'University'],
@@ -51,13 +54,17 @@ const S: Seed[] = [
 ];
 
 async function main() {
-  for (const [code, nameUz, nameRu, nameEn] of COUNTRIES) await db.country.upsert({ where: { code }, update: { nameUz, nameRu, nameEn }, create: { code, nameUz, nameRu, nameEn } });
+  for (const [code, nameUz, nameRu, nameEn] of COUNTRIES) {
+    const i = COUNTRY_INFO[code];
+    const extra = i ? { universities: i.unis, eduLang: i.lang, infoUz: i.uz, infoRu: i.ru, infoEn: i.en } : {};
+    await db.country.upsert({ where: { code }, update: { nameUz, nameRu, nameEn, ...extra }, create: { code, nameUz, nameRu, nameEn, ...extra } });
+  }
   for (const [slug, nameUz, nameRu, nameEn] of CATEGORIES) await db.category.upsert({ where: { slug }, update: {}, create: { slug, nameUz, nameRu, nameEn } });
 
   const email = process.env.ADMIN_EMAIL, pw = process.env.ADMIN_PASSWORD;
   if (email && pw) {
     await db.user.upsert({
-      where: { email: email.toLowerCase() }, update: {},
+      where: { email: email.toLowerCase() }, update: { role: 'ADMIN', emailVerifiedAt: new Date(), blockedAt: null },
       create: { email: email.toLowerCase(), passwordHash: await bcrypt.hash(pw, 12), role: 'ADMIN', firstName: 'Admin', lastName: 'Grantora', emailVerifiedAt: new Date(), profile: { create: {} } },
     });
     console.log('Admin tayyor:', email);
@@ -74,6 +81,15 @@ async function main() {
       },
     });
   }
+  for (const [i, p] of PROGRAMS.entries()) {
+    const data = { kind: p.kind, organization: p.org, countryCode: p.c, officialUrl: p.url, sortOrder: i, i18n: { uz: p.uz, ru: p.ru, en: p.en } };
+    await db.program.upsert({ where: { slug: p.slug }, update: data, create: { slug: p.slug, ...data } });
+  }
+  for (const [i, st] of STORIES.entries()) {
+    const data = { name: st.name, university: st.uni, countryCode: st.c, program: st.program, sortOrder: i, isSample: true, i18n: { uz: st.uz, ru: st.ru, en: st.en } };
+    await db.story.upsert({ where: { slug: st.slug }, update: {}, create: { slug: st.slug, ...data } });
+  }
+  if (process.env.SEED_DEMO_USERS === 'true') await demoUsers(db);
   console.log('Seed tugadi.');
 }
 main().finally(() => db.$disconnect());

@@ -54,6 +54,13 @@ enum ReportStatus {
   OPEN
   RESOLVED
 }
+enum ProgramKind {
+  EXCHANGE
+  DEGREE
+  SUMMER
+  RESEARCH
+  YOUTH
+}
 enum NotificationType {
   DEADLINE_REMINDER
   ADMIN_MESSAGE
@@ -135,7 +142,14 @@ model Country {
   nameUz       String
   nameRu       String
   nameEn       String
+  universities String[]      @default([])
+  eduLang      String?
+  infoUz       String?
+  infoRu       String?
+  infoEn       String?
   scholarships Scholarship[]
+  programs     Program[]
+  stories      Story[]
 }
 
 model Category {
@@ -292,4 +306,61 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+
+// ---- Ochiq sayt kontenti ----
+/// Xalqaro ta'lim dasturlari (almashinuv, yozgi maktab va h.k.). Matnlar tillar bo'yicha JSON: {uz:{title,summary,who,duration,funding,requirements},ru:{..},en:{..}}
+model Program {
+  id           String      @id @default(uuid())
+  slug         String      @unique
+  kind         ProgramKind
+  organization String
+  countryCode  String?
+  country      Country?    @relation(fields: [countryCode], references: [code])
+  i18n         Json
+  officialUrl  String
+  published    Boolean     @default(true)
+  sortOrder    Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([kind, published])
+}
+
+/// Muvaffaqiyat hikoyalari. isSample=true bo'lsa — namuna (haqiqiy shaxs emas), saytda "Namuna" belgisi bilan ko'rsatiladi.
+model Story {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  university  String
+  countryCode String?
+  country     Country? @relation(fields: [countryCode], references: [code])
+  program     String
+  photoUrl    String?
+  i18n        Json     // {uz:{quote,prep,text},ru:{..},en:{..}}
+  isSample    Boolean  @default(true)
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String       @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  locale    String       @default("uz")
+  status    ReportStatus @default(OPEN)
+  createdAt DateTime     @default(now())
+
+  @@index([status, createdAt])
+}
+
+model Subscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  locale    String   @default("uz")
+  createdAt DateTime @default(now())
 }
