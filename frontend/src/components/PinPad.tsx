@@ -8,18 +8,20 @@ export default function PinPad({ onComplete, onBio, hint, dark = false }: { onCo
   const [val, setVal] = useState('');
   const [err, setErr] = useState('');
   const [shake, setShake] = useState(false);
+  const cur = useRef('');
   const busy = useRef(false);
   const press = useCallback(async (k: string) => {
     if (busy.current) return;
-    if (k === 'back') { setVal((v) => v.slice(0, -1)); setErr(''); return; }
-    if (!/^\d$/.test(k)) return;
-    let next = '';
-    setVal((v) => { next = v.length >= PIN_LENGTH ? v : v + k; return next; });
-    if (next.length < PIN_LENGTH) return;
+    if (k === 'back') { cur.current = cur.current.slice(0, -1); setVal(cur.current); setErr(''); return; }
+    if (!/^\d$/.test(k) || cur.current.length >= PIN_LENGTH) return;
+    cur.current += k;
+    setVal(cur.current);
+    if (cur.current.length < PIN_LENGTH) return;
     busy.current = true;
+    const entered = cur.current;
     try {
-      const m = await onComplete(next);
-      setVal(''); setErr(m || '');
+      const m = (await onComplete(entered)) as string | undefined;
+      cur.current = ''; setVal(''); setErr(m || '');
       if (m) { setShake(true); setTimeout(() => setShake(false), 450); }
     } finally { busy.current = false; }
   }, [onComplete]);

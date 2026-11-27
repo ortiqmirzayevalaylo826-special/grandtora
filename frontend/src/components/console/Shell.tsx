@@ -9,6 +9,7 @@ import LangSwitch from '../LangSwitch';
 import ProfileMenu from '../ProfileMenu';
 import LockGate from '../LockGate';
 import NotificationBell from '../NotificationBell';
+import { getPrefs, showSystem, useInbox } from '../useInbox';
 import { ToastProvider, useL } from '../admin/kit';
 import DrawerHead from '../DrawerHead';
 import OfflineBar from '../OfflineBar';
@@ -70,7 +71,18 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
   const [q, setQ] = useState('');
   const role = kind === 'admin' ? 'ADMIN' : 'STUDENT';
   const items = kind === 'admin' ? ADMIN : STUDENT;
-  const { data: ov, reload: reloadOv } = useQuery<{ unread: number }>(kind === 'student' && user?.role === 'STUDENT' ? `/me/overview?locale=${locale}` : null);
+  const inbox = useInbox({ list: false, enabled: kind === 'student' });
+  const ov = { unread: inbox.unread };
+  const reloadOv = inbox.reload;
+  const digest = inbox.items.find((i) => i.src === 'gen' && i.id.startsWith('digest:'));
+  useEffect(() => {
+    if (!user || !digest) return;
+    try {
+      const k = `grantora.sysDay.${user.id}`; const day = new Date().toISOString().slice(0, 10);
+      if (!getPrefs(user.id).sys || localStorage.getItem(k) === day) return;
+      showSystem(digest.title, digest.body, 'digest').then((ok) => { if (ok) localStorage.setItem(k, day); });
+    } catch { /* */ }
+  }, [user, digest]);
 
   useEffect(() => {
     if (user === null) router.replace('/login');

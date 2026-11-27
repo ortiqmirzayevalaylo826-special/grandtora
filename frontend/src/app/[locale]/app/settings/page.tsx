@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api, useQuery } from '@/lib/client';
 import { ErrorBox, Notice, PageHead, Spinner, useErr } from '@/components/ui';
 import LockSettings from '@/components/LockSettings';
+import NotifSettings from '@/components/NotifSettings';
 import { Tabs, useL } from '@/components/admin/kit';
 import PwaClient from '@/components/PwaClient';
 import LangSwitch from '@/components/LangSwitch';
@@ -43,12 +44,15 @@ export default function Settings() {
         </div>
       )}
       {tab === 'notify' && (
+        <div className="space-y-5">
+        <Card title={L('Ilova bildirishnomalari', 'Уведомления приложения', 'App notifications')}><NotifSettings /></Card>
         <Card title={L('Email eslatmalar', 'Напоминания по email', 'Email reminders')} hint={data.email}>
           <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 h-4 w-4" checked={rem} onChange={(e) => toggle(e.target.checked)} />
             <span><b className="text-navy">{L('Muddat eslatmalari', 'Напоминания о сроках', 'Deadline reminders')}</b><br /><span className="text-muted">{L("Saqlangan va kuzatilayotgan grantlar muddatidan 7, 3 va 1 kun oldin emailga xabar keladi.", 'За 7, 3 и 1 день до срока сохранённых и отслеживаемых грантов придёт письмо.', 'You get an email 7, 3 and 1 day before the deadline of saved and tracked grants.')}</span></span></label>
           {msg && <div className="mt-3"><Notice kind={msg.kind}>{msg.text}</Notice></div>}
           <p className="mt-4 text-xs text-muted">{L("Administrator xabarlari va shikoyatlar natijasi «Bildirishnomalar» sahifasida doim ko'rinadi.", 'Сообщения администратора и результаты жалоб всегда видны на странице «Уведомления».', 'Admin messages and complaint outcomes always appear on the Notifications page.')}</p>
         </Card>
+        </div>
       )}
       {tab === 'security' && (
         <div className="space-y-5">
