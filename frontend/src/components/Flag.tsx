@@ -40,7 +40,7 @@ const FLAGS: Record<string, ReactNode> = {
 const ALIAS: Record<string, string> = { UK: 'GB' };
 
 export default function Flag({ code, className = 'h-5 w-7' }: { code: string; className?: string }) {
-  const raw = (code ?? '').toUpperCase();
+  const raw = (typeof code === 'string' ? code : '').toUpperCase();
   const c = ALIAS[raw] ?? raw;
   const body = FLAGS[c];
   return (

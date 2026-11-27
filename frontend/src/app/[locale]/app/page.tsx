@@ -71,7 +71,7 @@ export default function Overview() {
               const d = daysLeft(s.deadline); const p = pill(d, s.rolling);
               return (
                 <Link key={s.id} href={`/scholarships/${s.slug}`} className="card flex min-w-[78%] snap-start flex-col gap-3 p-4 transition hover:-translate-y-0.5 sm:min-w-0">
-                  <div className="flex items-center gap-3"><Flag code={s.country} className="h-8 w-12 shrink-0 rounded" /><div className="min-w-0"><p className="truncate font-bold text-navy">{s.tr?.title ?? s.slug}</p><p className="truncate text-xs text-muted">{s.organization} · {countryName(s.country, locale)}</p></div></div>
+                  <div className="flex items-center gap-3"><Flag code={s.countryCode} className="h-8 w-12 shrink-0 rounded" /><div className="min-w-0"><p className="truncate font-bold text-navy">{s.tr?.title ?? s.slug}</p><p className="truncate text-xs text-muted">{s.organization} · {countryName(s.country, locale)}</p></div></div>
                   <div className="flex flex-wrap gap-1.5">{(s.levels ?? []).slice(0, 3).map((l: string) => <span key={l} className="chip">{c(`level.${l}`)}</span>)}<span className="chip">{c(`funding.${s.funding}`)}</span></div>
                   {p.text && <span className={`mt-auto w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${p.cls}`}>{p.text}</span>}
                 </Link>
@@ -91,7 +91,7 @@ export default function Overview() {
                 const d = daysLeft(s.deadline); const p = pill(d, s.rolling);
                 return (
                   <li key={s.id} className="flex items-center gap-3 py-3">
-                    <Flag code={s.country} className="h-6 w-9 shrink-0 rounded" />
+                    <Flag code={s.countryCode} className="h-6 w-9 shrink-0 rounded" />
                     <div className="min-w-0 flex-1"><Link href={`/scholarships/${s.slug}`} className="block truncate font-semibold text-navy hover:text-primary">{s.tr?.title ?? s.slug}</Link><p className="truncate text-xs text-muted">{L('Ariza topshirish muddati', 'Срок подачи заявки', 'Application deadline')}</p></div>
                     {p.text && <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${p.cls}`}>{p.text}</span>}
                   </li>
