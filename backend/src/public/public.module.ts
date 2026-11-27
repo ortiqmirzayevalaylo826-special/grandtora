@@ -17,6 +17,7 @@ class ContactDto {
   @IsString() @MinLength(2) @MaxLength(120) subject: string;
   @IsString() @MinLength(5) @MaxLength(4000) message: string;
   @IsOptional() @IsIn(LOCALES) locale?: string;
+  @IsOptional() @IsIn(['general', 'grants', 'account', 'technical', 'other']) category?: string;
 }
 class SubscribeDto {
   @IsEmail() @MaxLength(254) email: string;
@@ -111,7 +112,7 @@ export class PublicController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('contact')
   async contact(@Body() d: ContactDto) {
-    await this.db.contactMessage.create({ data: { name: d.name.trim(), email: d.email.toLowerCase(), subject: d.subject.trim(), message: d.message.trim(), locale: lang(d.locale) } });
+    await this.db.contactMessage.create({ data: { name: d.name.trim(), email: d.email.toLowerCase(), subject: d.subject.trim(), message: d.message.trim(), locale: lang(d.locale), category: d.category ?? 'general' } });
     return { ok: true };
   }
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

@@ -20,7 +20,7 @@ export default function Notifications() {
         <ul className="space-y-2">
           {data.map((n) => {
             const title = n.scholarship?.tr?.title ?? n.scholarship?.slug ?? '';
-            const text = n.type === 'DEADLINE_REMINDER' ? t('deadline', { title, n: n.payload?.level ?? '' }) : t('system');
+            const text = n.type === 'DEADLINE_REMINDER' ? t('deadline', { title, n: n.payload?.level ?? '' }) : n.type === 'ADMIN_MESSAGE' && n.payload?.title ? `${n.payload.title}: ${n.payload.body ?? ''}` : t('system');
             const inner = (
               <>
                 <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${n.readAt ? 'bg-navy/15' : 'bg-primary'}`} />

@@ -14,6 +14,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { StorageModule } from './storage/storage.module';
 import { PublicModule } from './public/public.module';
 import { InboxModule } from './admin/inbox.module';
+import { PanelModule } from './admin/panel.module';
 
 /** Render sog'liq tekshiruvi */
 @SkipThrottle()
@@ -26,7 +27,7 @@ export class HealthController { @Get() ok() { return { ok: true, t: Date.now() }
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]), // umumiy tezlik cheklovi
     ScheduleModule.forRoot(),
     JwtModule.register({ global: true }),
-    PrismaModule, MailModule, StorageModule, AuthModule, ScholarshipsModule, MeModule, AdminModule, InboxModule, PublicModule, JobsModule,
+    PrismaModule, MailModule, StorageModule, AuthModule, ScholarshipsModule, MeModule, AdminModule, InboxModule, PanelModule, PublicModule, JobsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

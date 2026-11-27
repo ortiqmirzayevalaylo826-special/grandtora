@@ -24,6 +24,10 @@ const COUNTRIES: [string, string, string, string][] = [
 const CATEGORIES: [string, string, string, string][] = [
   ['government', 'Davlat granti', 'Государственный грант', 'Government'], ['university', 'Universitet', 'Университет', 'University'],
   ['foundation', 'Jamg\'arma', 'Фонд', 'Foundation'],
+  ['it-engineering', 'IT va muhandislik', 'IT и инженерия', 'IT & Engineering'], ['medicine', 'Tibbiyot', 'Медицина', 'Medicine'],
+  ['economics-business', 'Iqtisodiyot va biznes', 'Экономика и бизнес', 'Economics & Business'], ['natural-sciences', 'Tabiiy fanlar', 'Естественные науки', 'Natural sciences'],
+  ['social-sciences', 'Ijtimoiy fanlar', 'Социальные науки', 'Social sciences'], ['education', 'Ta\'lim', 'Образование', 'Education'],
+  ['art-design', 'San\'at va dizayn', 'Искусство и дизайн', 'Art & Design'],
 ];
 
 interface Seed { slug: string; org: string; c: string; levels: StudyLevel[]; funding: FundingType; ielts?: number; gpa?: number; dl: number; url: string; lang: string;

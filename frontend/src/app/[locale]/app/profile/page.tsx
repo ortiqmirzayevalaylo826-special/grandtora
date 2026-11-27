@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { api, useQuery } from '@/lib/client';
 import { ErrorBox, Field, Notice, PageHead, Spinner, useErr } from '@/components/ui';
 
-const LEVELS = ['BACHELOR', 'MASTER', 'PHD'];
+const LEVELS = ['BACHELOR', 'MASTER', 'PHD', 'POSTDOC', 'SHORT'];
 const num = (v: string) => (v.trim() === '' ? null : Number(v));
 
 export default function Profile() {

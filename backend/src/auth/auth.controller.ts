@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nes
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { EmailDto, LoginDto, RegisterDto, ResetDto, VerifyDto } from './dto';
+import { EmailDto, LoginDto, QuickDto, RegisterDto, ResetDto, VerifyDto } from './dto';
 import { AuthUser, CurrentUser, JwtAuthGuard } from '../common/auth';
 
 const secure = () => process.env.COOKIE_SECURE === 'true';
@@ -40,6 +40,15 @@ export class AuthController {
   @Post('login/otp/verify') @HttpCode(200)
   async otpVerify(@Body() dto: VerifyDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const s = await this.auth.verifyLoginOtp(dto.email, dto.code, req.headers['user-agent']);
+    setSession(res, s);
+    return { user: s.user };
+  }
+
+  @Post('quick/request') @HttpCode(200) quickRequest(@Body() dto: QuickDto) { return this.auth.requestQuick(dto.email, dto.locale); }
+
+  @Post('quick/verify') @HttpCode(200)
+  async quickVerify(@Body() dto: VerifyDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const s = await this.auth.verifyQuick(dto.email, dto.code, req.headers['user-agent']);
     setSession(res, s);
     return { user: s.user };
   }

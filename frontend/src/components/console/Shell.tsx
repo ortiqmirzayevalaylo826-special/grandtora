@@ -19,6 +19,7 @@ const STUDENT: Item[] = [
   { href: '/app/applications', key: 'applications', icon: 'list' },
   { href: '/app/documents', key: 'documents', icon: 'file' },
   { href: '/app/calendar', key: 'calendar', icon: 'calendar' },
+  { href: '/app/messages', key: 'messages', icon: 'msg' },
   { href: '/app/notifications', key: 'notifications', icon: 'bell', dot: true },
   { href: '/app/profile', key: 'profile', icon: 'user' },
   { href: '/app/settings', key: 'settings', icon: 'settings' },
@@ -35,7 +36,7 @@ const ADMIN: Item[] = [
   { href: '/admin/audit', key: 'a_audit', icon: 'log' },
 ];
 const BOTTOM: Record<'student' | 'admin', string[]> = {
-  student: ['overview', 'recommended', 'applications', 'notifications'],
+  student: ['overview', 'recommended', 'applications', 'messages', 'notifications'],
   admin: ['a_stats', 'a_sch', 'a_users', 'a_reports'],
 };
 

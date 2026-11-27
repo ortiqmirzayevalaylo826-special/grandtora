@@ -100,6 +100,26 @@ export class AuthService {
     return this.session(u, ua);
   }
 
+  /** "Google/Gmail bilan kirish": parolsiz, faqat emailga kelgan kod. Hisob yo'q bo'lsa yaratiladi (kod tasdiqlangach faollashadi). */
+  async requestQuick(emailRaw: string, locale: string) {
+    const email = this.norm(emailRaw);
+    let u = await this.db.user.findUnique({ where: { email } });
+    if (!u) {
+      const name = email.split('@')[0].replace(/[^\p{L}\p{M}' .-]/gu, ' ').trim().slice(0, 60) || 'User';
+      u = await this.db.user.create({ data: { email, passwordHash: await bcrypt.hash(randomBytes(24).toString('base64url') + 'aA1!', 12), firstName: name, lastName: '', locale, role: 'STUDENT', profile: { create: {} } } });
+    }
+    if (!u.blockedAt) await this.issueOtp(email, 'LOGIN', u.locale);
+    return { ok: true };
+  }
+  async verifyQuick(emailRaw: string, code: string, ua?: string) {
+    const email = this.norm(emailRaw);
+    const u = await this.db.user.findUnique({ where: { email } });
+    if (!u || u.blockedAt) throw new BadRequestException('otp_expired');
+    await this.checkOtp(email, 'LOGIN', code);
+    const v = u.emailVerifiedAt ? u : await this.db.user.update({ where: { id: u.id }, data: { emailVerifiedAt: new Date() } });
+    return this.session(v, ua);
+  }
+
   async forgot(emailRaw: string) {
     const email = this.norm(emailRaw);
     const u = await this.db.user.findUnique({ where: { email } });
@@ -116,6 +136,8 @@ export class AuthService {
 
   // ---- tokenlar ----
   private async session(u: User, ua?: string) {
+    this.db.user.update({ where: { id: u.id }, data: { lastActiveAt: new Date() } }).catch(() => undefined);
+    if (u.role === 'ADMIN') this.db.auditLog.create({ data: { actorId: u.id, action: 'LOGIN', entity: 'Auth', section: 'auth', userAgent: ua?.slice(0, 200) } }).catch(() => undefined);
     const access = await this.jwt.signAsync({ sub: u.id, role: u.role }, { secret: process.env.JWT_ACCESS_SECRET, expiresIn: ACCESS_TTL_S });
     const refresh = randomBytes(48).toString('base64url');
     await this.db.refreshToken.create({ data: { userId: u.id, tokenHash: createHash('sha256').update(refresh).digest('hex'), expiresAt: new Date(Date.now() + REFRESH_TTL_MS), userAgent: ua?.slice(0, 200) } });

@@ -23,3 +23,8 @@ export class LoginDto {
 export class ResetDto extends VerifyDto {
   @Matches(PW, { message: 'weak_password' }) newPassword: string;
 }
+
+export class QuickDto {
+  @IsEmail() @MaxLength(254) email: string;
+  @IsIn(['uz', 'ru', 'en']) locale: string;
+}

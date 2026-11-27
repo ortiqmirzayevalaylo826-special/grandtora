@@ -28,7 +28,7 @@ export class ListQuery {
 }
 
 export const FUNDING = ['FULL', 'PARTIAL', 'TUITION', 'LIVING'];
-export const LEVELS = ['BACHELOR', 'MASTER', 'PHD'];
+export const LEVELS = ['BACHELOR', 'MASTER', 'PHD', 'POSTDOC', 'SHORT'];
 
 @Injectable()
 export class ScholarshipsService {
@@ -80,6 +80,7 @@ export class ScholarshipsService {
     const s = await this.db.scholarship.findFirst({ where: { slug, status: 'PUBLISHED' }, include: { translations: true, country: true, category: true } });
     if (!s) throw new NotFoundException();
     this.db.scholarship.update({ where: { id: s.id }, data: { views: { increment: 1 } } }).catch(() => undefined);
+    this.db.$executeRaw`INSERT INTO "DailyView" ("day", "views") VALUES (CURRENT_DATE, 1) ON CONFLICT ("day") DO UPDATE SET "views" = "DailyView"."views" + 1`.catch(() => undefined);
     return this.present(s, locale);
   }
 
@@ -93,12 +94,12 @@ export class ScholarshipsService {
     return rows.map((r) => this.present(r, locale));
   }
 
-  countries() { return this.db.country.findMany({ orderBy: { nameEn: 'asc' } }); }
+  countries() { return this.db.country.findMany({ where: { active: true }, orderBy: { nameEn: 'asc' } }); }
 
   /** Filtrlar uchun: faqat nashr etilgan dasturi bor davlatlar, kategoriyalar */
   async meta() {
     const [countries, categories, grouped] = await Promise.all([
-      this.db.country.findMany({ orderBy: { nameEn: 'asc' } }),
+      this.db.country.findMany({ where: { active: true }, orderBy: { nameEn: 'asc' } }),
       this.db.category.findMany({ orderBy: { nameEn: 'asc' } }),
       this.db.scholarship.groupBy({ by: ['countryCode'], where: { status: 'PUBLISHED' }, _count: true }),
     ]);

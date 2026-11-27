@@ -68,7 +68,9 @@
   "level": {
     "BACHELOR": "Bachelor",
     "MASTER": "Master",
-    "PHD": "PhD"
+    "PHD": "PhD",
+    "POSTDOC": "Postdoctoral",
+    "SHORT": "Short program"
   },
   "funding": {
     "FULL": "Full funding",
@@ -144,7 +146,33 @@
     "resent": "If this email is registered, a code was sent.",
     "backLogin": "Back to login",
     "logout": "Log out",
-    "wait": "A code can be sent once every 60 seconds."
+    "wait": "A code can be sent once every 60 seconds.",
+    "loginSub": "Sign in to your Grantora account",
+    "registerSub": "Create a new Grantora account",
+    "orSocial": "or",
+    "google": "Continue with Google (Gmail)",
+    "quickTitle": "Sign in with Gmail",
+    "quickHint": "Enter your email and we'll send a 6-digit code. If you have no account yet, one is created automatically.",
+    "showPw": "Show password",
+    "confirmPw": "Confirm password",
+    "mismatch": "Passwords do not match",
+    "mustAgree": "Please accept the terms to continue",
+    "agree1": "I agree to the",
+    "terms": "Terms of use",
+    "agree2": "and",
+    "privacy": "Privacy policy",
+    "agree3": "",
+    "changeEmail": "Change email",
+    "pLoginTitle1": "World-class education opportunities",
+    "pLoginTitle2": "one step closer",
+    "pLoginSub": "Discover grants, scholarships and international programs with Grantora.",
+    "pRegTitle1": "Join grants and international programs",
+    "pRegTitle2": "today",
+    "pRegSub": "Create a personal account and make the most of every opportunity.",
+    "pf1": "Matching grant suggestions",
+    "pf2": "Important deadline reminders",
+    "pf3": "Document storage",
+    "pf4": "Application tracking"
   },
   "footer": {
     "rights": "All rights reserved",
@@ -234,6 +262,7 @@
     "a_fresh": "Freshness",
     "a_catalog": "Countries & categories",
     "a_audit": "Audit log",
+    "messages": "Messages",
     "a_messages": "Messages"
   },
   "status": {
@@ -534,7 +563,13 @@
     "message": "Message",
     "send": "Send",
     "sent": "Thank you! Your message has been received.",
-    "noInfo": "Contact details will be added soon. For now, please use the form."
+    "noInfo": "Contact details will be added soon. For now, please use the form.",
+    "category": "Category",
+    "cat_general": "General question",
+    "cat_grants": "About grants",
+    "cat_account": "Account & sign-in",
+    "cat_technical": "Technical issue",
+    "cat_other": "Other"
   },
   "legal": {
     "privacyTitle": "Privacy policy",

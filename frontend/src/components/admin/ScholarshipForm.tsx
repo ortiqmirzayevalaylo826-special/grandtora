@@ -6,7 +6,7 @@ import { api, useQuery } from '@/lib/client';
 import { ErrorBox, Field, Notice, PageHead, Spinner, useErr } from '@/components/ui';
 
 const LOCALES = ['uz', 'ru', 'en'] as const;
-const LEVELS = ['BACHELOR', 'MASTER', 'PHD'];
+const LEVELS = ['BACHELOR', 'MASTER', 'PHD', 'POSTDOC', 'SHORT'];
 const FUNDING = ['FULL', 'PARTIAL', 'TUITION', 'LIVING'];
 const lines = (v: string) => v.split('\n').map((x) => x.trim()).filter(Boolean);
 const num = (v: string) => (v.trim() === '' ? null : Number(v));

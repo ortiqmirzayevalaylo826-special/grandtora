@@ -62,7 +62,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
               </select>
               <select name="levels" className="input" aria-label={t('level')} defaultValue="">
                 <option value="">{t('level')}</option>
-                {['BACHELOR', 'MASTER', 'PHD'].map((l) => <option key={l} value={l}>{lv(l)}</option>)}
+                {['BACHELOR', 'MASTER', 'PHD', 'POSTDOC', 'SHORT'].map((l) => <option key={l} value={l}>{lv(l)}</option>)}
               </select>
               <button className="btn btn-primary sm:col-span-2">{t('go')}</button>
             </form>

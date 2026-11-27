@@ -16,6 +16,8 @@ enum StudyLevel {
   BACHELOR
   MASTER
   PHD
+  POSTDOC
+  SHORT
 }
 enum FundingType {
   FULL
@@ -49,6 +51,24 @@ enum ReviewStatus {
   PENDING
   APPROVED
   REJECTED
+  HIDDEN
+}
+enum TicketStage {
+  NEW
+  IN_PROGRESS
+  ANSWERED
+  CLOSED
+}
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+enum FreshStatus {
+  UNCHECKED
+  CHECKING
+  VERIFIED
+  REJECTED
 }
 enum ReportStatus {
   OPEN
@@ -80,6 +100,7 @@ model User {
   failedLogins    Int       @default(0)
   lockedUntil     DateTime?
   emailReminders  Boolean   @default(true)
+  lastActiveAt    DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -91,6 +112,7 @@ model User {
   reviews       Review[]
   reports       ProblemReport[]
   refreshTokens RefreshToken[]
+  conversation  Conversation?
 }
 
 model Profile {
@@ -150,6 +172,7 @@ model Country {
   scholarships Scholarship[]
   programs     Program[]
   stories      Story[]
+  active       Boolean       @default(true)
 }
 
 model Category {
@@ -186,6 +209,8 @@ model Scholarship {
   featured       Boolean           @default(false)
   isDemo         Boolean           @default(false)
   lastVerifiedAt DateTime?
+  checkStatus    FreshStatus       @default(UNCHECKED)
+  checkNote      String?
   views          Int               @default(0)
   publishedAt    DateTime?
   createdById    String?
@@ -298,6 +323,9 @@ model ProblemReport {
 model AuditLog {
   id        String   @id @default(uuid())
   actorId   String?
+  userAgent String?
+  result    String   @default("OK")
+  section   String?
   action    String
   entity    String
   entityId  String?
@@ -321,6 +349,9 @@ model Program {
   i18n         Json
   officialUrl  String
   published    Boolean     @default(true)
+  checkStatus  FreshStatus @default(UNCHECKED)
+  checkNote    String?
+  checkedAt    DateTime?
   sortOrder    Int         @default(0)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -353,9 +384,59 @@ model ContactMessage {
   message   String
   locale    String       @default("uz")
   status    ReportStatus @default(OPEN)
+  num        Int            @default(autoincrement())
+  category   String         @default("general")
+  priority   TicketPriority @default(NORMAL)
+  stage      TicketStage    @default(NEW)
+  assigneeId String?
   createdAt DateTime     @default(now())
+  replies   TicketReply[]
 
   @@index([status, createdAt])
+  @@index([stage, createdAt])
+}
+
+model TicketReply {
+  id        String         @id @default(uuid())
+  messageId String
+  message   ContactMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  authorId  String
+  body      String
+  createdAt DateTime       @default(now())
+
+  @@index([messageId, createdAt])
+}
+
+/// Admin va talaba o'rtasidagi suhbat (har talabaga bitta)
+model Conversation {
+  id            String        @id @default(uuid())
+  studentId     String        @unique
+  student       User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  archived      Boolean       @default(false)
+  lastMessageAt DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  messages      ChatMessage[]
+
+  @@index([archived, lastMessageAt])
+}
+
+model ChatMessage {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  fromAdmin      Boolean
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+/// Kunlik ko'rishlar soni (grafik uchun)
+model DailyView {
+  day   DateTime @id @db.Date
+  views Int      @default(0)
 }
 
 model Subscriber {

@@ -9,13 +9,13 @@ export default function ContactForm() {
   const t = useTranslations('contact');
   const locale = useLocale();
   const err = useErr();
-  const [f, setF] = useState({ name: '', email: '', subject: '', message: '' });
+  const [f, setF] = useState({ name: '', email: '', subject: '', message: '', category: 'general' });
   const [state, setState] = useState<'idle' | 'busy' | 'ok' | string>('idle');
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((p) => ({ ...p, [k]: e.target.value }));
   async function submit(e: FormEvent) {
     e.preventDefault();
     setState('busy');
-    try { await api('/contact', { body: { ...f, locale } }); setState('ok'); setF({ name: '', email: '', subject: '', message: '' }); }
+    try { await api('/contact', { body: { ...f, locale } }); setState('ok'); setF({ name: '', email: '', subject: '', message: '', category: 'general' }); }
     catch (x: any) { setState(`e:${x?.code ?? 'generic'}`); }
   }
   return (
@@ -25,6 +25,11 @@ export default function ContactForm() {
         <Field label={t('name')}><input className="input" required minLength={2} maxLength={80} value={f.name} onChange={set('name')} autoComplete="name" /></Field>
         <Field label={t('emailF')}><input className="input" type="email" required maxLength={254} value={f.email} onChange={set('email')} autoComplete="email" /></Field>
       </div>
+      <Field label={t('category')}>
+        <select className="input" value={f.category} onChange={set('category')}>
+          {['general', 'grants', 'account', 'technical', 'other'].map((c) => <option key={c} value={c}>{t(`cat_${c}`)}</option>)}
+        </select>
+      </Field>
       <Field label={t('subject')}><input className="input" required minLength={2} maxLength={120} value={f.subject} onChange={set('subject')} /></Field>
       <Field label={t('message')}><textarea className="input min-h-36 py-3" required minLength={5} maxLength={4000} value={f.message} onChange={set('message')} /></Field>
       {state === 'ok' && <Notice kind="ok">{t('sent')}</Notice>}

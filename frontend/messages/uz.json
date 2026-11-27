@@ -68,7 +68,9 @@
   "level": {
     "BACHELOR": "Bakalavr",
     "MASTER": "Magistr",
-    "PHD": "PhD"
+    "PHD": "PhD",
+    "POSTDOC": "Postdoktorantura",
+    "SHORT": "Qisqa muddatli dastur"
   },
   "funding": {
     "FULL": "To'liq grant",
@@ -144,7 +146,33 @@
     "resent": "Agar bu email ro'yxatda bo'lsa, kod yuborildi.",
     "backLogin": "Kirishga qaytish",
     "logout": "Chiqish",
-    "wait": "Kod 60 soniyada bir marta yuboriladi."
+    "wait": "Kod 60 soniyada bir marta yuboriladi.",
+    "loginSub": "Grantora hisobingizga kiring",
+    "registerSub": "Grantora'da yangi hisob yarating",
+    "orSocial": "yoki",
+    "google": "Google (Gmail) bilan kirish",
+    "quickTitle": "Gmail orqali kirish",
+    "quickHint": "Emailingizni kiriting, 6 xonali kod yuboramiz. Hisobingiz bo'lmasa, avtomatik yaratiladi.",
+    "showPw": "Parolni ko'rsatish",
+    "confirmPw": "Parolni tasdiqlash",
+    "mismatch": "Parollar bir xil emas",
+    "mustAgree": "Davom etish uchun shartlarga rozilik bering",
+    "agree1": "Men",
+    "terms": "Foydalanish shartlari",
+    "agree2": "va",
+    "privacy": "Maxfiylik siyosatiga",
+    "agree3": "roziman",
+    "changeEmail": "Emailni o'zgartirish",
+    "pLoginTitle1": "Dunyo miqyosidagi ta'lim imkoniyatlariga",
+    "pLoginTitle2": "bir qadam yaqinroq",
+    "pLoginSub": "Grantlar, stipendiyalar va xalqaro dasturlarni Grantora bilan kashf eting.",
+    "pRegTitle1": "Grantlar va xalqaro dasturlarga",
+    "pRegTitle2": "qo'shiling",
+    "pRegSub": "Shaxsiy hisob yarating va imkoniyatlardan to'liq foydalaning.",
+    "pf1": "Mos grantlar tavsiyasi",
+    "pf2": "Muhim muddat eslatmalari",
+    "pf3": "Hujjatlarni saqlash",
+    "pf4": "Arizalarni kuzatish"
   },
   "footer": {
     "rights": "Barcha huquqlar himoyalangan",
@@ -234,6 +262,7 @@
     "a_fresh": "Yangilik tekshiruvi",
     "a_catalog": "Davlat va kategoriya",
     "a_audit": "Audit jurnali",
+    "messages": "Xabarlar",
     "a_messages": "Murojaatlar"
   },
   "status": {
@@ -534,7 +563,13 @@
     "message": "Xabar matni",
     "send": "Yuborish",
     "sent": "Rahmat! Xabaringiz qabul qilindi.",
-    "noInfo": "Aloqa ma'lumotlari tez orada qo'shiladi. Hozircha formadan foydalaning."
+    "noInfo": "Aloqa ma'lumotlari tez orada qo'shiladi. Hozircha formadan foydalaning.",
+    "category": "Kategoriya",
+    "cat_general": "Umumiy savol",
+    "cat_grants": "Grantlar haqida",
+    "cat_account": "Hisob va kirish",
+    "cat_technical": "Texnik muammo",
+    "cat_other": "Boshqa"
   },
   "legal": {
     "privacyTitle": "Maxfiylik siyosati",

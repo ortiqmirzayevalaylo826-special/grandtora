@@ -81,6 +81,10 @@ export class MailService {
     const [s, b] = (T[locale] ?? T.uz).otp(code);
     return this.send(to, s, b);
   }
+  /** Admin javobi va boshqa oddiy xatlar. Mavzu har doim "Grantora" bilan boshlanadi. */
+  sendPlain(to: string, subject: string, text: string) {
+    return this.send(to, subject.startsWith('Grantora') ? subject : `Grantora: ${subject}`, text.startsWith('Grantora') ? text : `Grantora\n\n${text}`);
+  }
   sendReminder(to: string, title: string, days: number, locale = 'uz') {
     const [s, b] = (T[locale] ?? T.uz).reminder(title, days);
     return this.send(to, s, b);

@@ -53,7 +53,7 @@ export default async function Catalog({ params, searchParams }: { params: Promis
             </fieldset>
             <fieldset>
               <legend className="mb-2 text-sm font-bold text-navy">{t('catalog.level')}</legend>
-              {['BACHELOR', 'MASTER', 'PHD'].map((l) => (
+              {['BACHELOR', 'MASTER', 'PHD', 'POSTDOC', 'SHORT'].map((l) => (
                 <label key={l} className="mb-1.5 flex items-center gap-2 text-sm">
                   <input type="checkbox" name="levels" value={l} defaultChecked={sel('levels').includes(l)} /> {t(`level.${l}`)}
                 </label>
