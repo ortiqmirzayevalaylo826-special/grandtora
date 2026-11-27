@@ -6,6 +6,7 @@
     "home": "Home",
     "install": "Install app",
     "iosHint": "In Safari tap Share → Add to Home Screen.",
+    "installHint": "In your browser menu choose “Install app” or “Add to Home Screen”.",
     "programs": "Programmes",
     "countries": "Countries",
     "stories": "Stories",
@@ -218,6 +219,9 @@
     "generic": "Something went wrong. Please try again.",
     "network": "Can't reach the server.",
     "invalid_credentials": "Wrong email or password",
+    "account_blocked": "Your account is blocked. Please contact the administrator.",
+    "resolution_required": "Write the resolution",
+    "complaint_self": "You can't file a complaint against yourself",
     "locked": "Too many attempts. Try again in 15 minutes.",
     "otp_wrong": "Wrong code",
     "otp_expired": "Code expired or not requested",
@@ -263,6 +267,8 @@
     "a_catalog": "Countries & categories",
     "a_audit": "Audit log",
     "messages": "Messages",
+    "search": "Search grants, programs or universities…",
+    "help": "Guide & help",
     "a_messages": "Messages"
   },
   "status": {

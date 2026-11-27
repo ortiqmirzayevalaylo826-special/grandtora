@@ -110,6 +110,8 @@ model User {
   documents     Document[]
   notifications Notification[]
   reviews       Review[]
+  complaintsMade    Complaint[] @relation("ComplaintReporter")
+  complaintsAgainst Complaint[] @relation("ComplaintTarget")
   reports       ProblemReport[]
   refreshTokens RefreshToken[]
   conversation  Conversation?
@@ -444,4 +446,32 @@ model Subscriber {
   email     String   @unique
   locale    String   @default("uz")
   createdAt DateTime @default(now())
+}
+
+enum ComplaintStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+/// Foydalanuvchilar shikoyati/nizosi: sharh, boshqa foydalanuvchi yoki umumiy muammo. Admin ko'rib chiqib hal qiladi.
+model Complaint {
+  id           String          @id @default(uuid())
+  num          Int             @default(autoincrement())
+  reporterId   String
+  reporter     User            @relation("ComplaintReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUserId String?
+  target       User?           @relation("ComplaintTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+  kind         String          @default("OTHER")
+  subject      String
+  text         String
+  status       ComplaintStatus @default(OPEN)
+  resolution   String?
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status, createdAt])
 }

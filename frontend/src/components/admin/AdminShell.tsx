@@ -4,10 +4,11 @@ import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@/lib/client';
 import LangSwitch from '@/components/LangSwitch';
+import PwaClient from '@/components/PwaClient';
 import { Icon, Spinner } from '@/components/ui';
 import { Avatar, ToastProvider, useL } from './kit';
 
-interface Counters { tickets: number; reviews: number; grants: number; chats: number }
+interface Counters { tickets: number; reviews: number; grants: number; chats: number; complaints: number }
 
 /** Admin qobig'i: chap sidebar (planshetda faqat ikonkalar, telefonda drawer), yuqorida qidiruv, bildirishnomalar, til va profil. */
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -45,16 +46,20 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { href: '/admin/scholarships', label: L('Grantlar', 'Гранты', 'Grants'), icon: 'list', n: cnt?.grants },
     { href: '/admin/users', label: L('Foydalanuvchilar', 'Пользователи', 'Users'), icon: 'users' },
     { href: '/admin/messages', label: L('Xabarlar', 'Сообщения', 'Messages'), icon: 'msg', n: cnt?.chats },
+    { href: '/admin/complaints', label: L('Shikoyatlar', 'Жалобы', 'Complaints'), icon: 'alert', n: cnt?.complaints },
     { href: '/admin/reviews', label: L('Sharhlar', 'Отзывы', 'Reviews'), icon: 'star', n: cnt?.reviews },
     { href: '/admin/tickets', label: L('Murojaatlar', 'Обращения', 'Inquiries'), icon: 'inbox', n: cnt?.tickets },
     { href: '/admin/freshness', label: L('Yangilik tekshiruvi', 'Проверка актуальности', 'Freshness check'), icon: 'refresh' },
     { href: '/admin/catalog', label: L('Davlat va kategoriyalar', 'Страны и категории', 'Countries & categories'), icon: 'globe' },
     { href: '/admin/audit', label: L('Audit jurnali', 'Журнал аудита', 'Audit log'), icon: 'log' },
+    { href: '/admin/guide', label: L("Qo'llanma", 'Руководство', 'Guide'), icon: 'book' },
+    { href: '/admin/settings', label: L('Sozlamalar', 'Настройки', 'Settings'), icon: 'settings' },
   ];
   const active = (h: string) => (h === '/admin' ? path === h : path === h || path.startsWith(h + '/'));
   const alerts = [
     { n: cnt?.tickets ?? 0, href: '/admin/tickets', t: L('yangi murojaat', 'новых обращений', 'new inquiries'), icon: 'inbox' },
     { n: cnt?.chats ?? 0, href: '/admin/messages', t: L("o'qilmagan xabar", 'непрочитанных сообщений', 'unread messages'), icon: 'msg' },
+    { n: cnt?.complaints ?? 0, href: '/admin/complaints', t: L('ochiq shikoyat', 'открытых жалоб', 'open complaints'), icon: 'alert' },
     { n: cnt?.reviews ?? 0, href: '/admin/reviews', t: L('kutilayotgan sharh', 'отзывов на проверке', 'reviews to moderate'), icon: 'star' },
     { n: cnt?.grants ?? 0, href: '/admin/scholarships?status=PENDING', t: L('tekshiruvdagi grant', 'грантов на проверке', 'grants pending review'), icon: 'list' },
   ];
@@ -107,6 +112,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <input className="input !h-10 !pl-10" value={q} onChange={(e) => setQ(e.target.value)} placeholder={L('Grant qidirish…', 'Поиск гранта…', 'Search grants…')} aria-label={L('Grant qidirish', 'Поиск гранта', 'Search grants')} />
           </form>
           <div className="ml-auto flex items-center gap-2" ref={popRef}>
+            <PwaClient />
             <LangSwitch />
             <div className="relative">
               <button className="relative grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" onClick={() => { setBell((v) => !v); setMenu(false); }} aria-label={L('Bildirishnomalar', 'Уведомления', 'Notifications')} aria-expanded={bell}>
@@ -152,7 +158,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
         {/* telefon: pastki tezkor panel */}
         <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-[#E5E7EB] bg-white pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Quick">
-          {[items[0], items[1], items[2], items[5]].map((i) => (
+          {[items[0], items[1], items[2], items[3]].map((i) => (
             <Link key={i.href} href={i.href} aria-current={active(i.href) ? 'page' : undefined} className={`relative flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold ${active(i.href) ? 'text-primary' : 'text-muted'}`}>
               <Icon name={i.icon} className="h-5 w-5" /><span className="max-w-full truncate px-1">{i.label.split(' ')[0]}</span>
               {!!i.n && <span className="absolute right-[26%] top-2 h-2 w-2 rounded-full bg-red-500" />}

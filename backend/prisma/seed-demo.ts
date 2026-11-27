@@ -8,7 +8,6 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 export const DEMO_ACCOUNTS = [
-  { email: 'demo.admin@grantora.demo', role: 'ADMIN', note: "Administrator — /admin paneli" },
   { email: 'demo.student1@grantora.demo', role: 'STUDENT', note: "Madina — to'ldirilgan profil, saqlanganlar, arizalar, eslatma" },
   { email: 'demo.student2@grantora.demo', role: 'STUDENT', note: "Jasur — yangi, bo'sh akkaunt" },
   { email: 'demo.blocked@grantora.demo', role: 'STUDENT', note: 'Bloklangan akkaunt — kira olmaydi' },
@@ -24,7 +23,8 @@ export async function demoUsers(db: PrismaClient) {
       create: { email, passwordHash: hash, role, firstName: first, lastName: last, emailVerifiedAt: new Date(), blockedAt: blocked ? new Date() : null, profile: { create: {} } },
     });
 
-  await mk('demo.admin@grantora.demo', 'ADMIN', 'Demo', 'Admin');
+  // Admin uchun demo akkaunt yo'q; avval yaratilgan bo'lsa olib tashlaymiz
+  await db.user.deleteMany({ where: { email: 'demo.admin@grantora.demo' } });
   const s1 = await mk('demo.student1@grantora.demo', 'STUDENT', 'Madina', 'Karimova');
   await mk('demo.student2@grantora.demo', 'STUDENT', 'Jasur', 'Rahimov');
   await mk('demo.blocked@grantora.demo', 'STUDENT', 'Bloklangan', 'Foydalanuvchi', true);

@@ -22,6 +22,7 @@ const STUDENT: Item[] = [
   { href: '/app/messages', key: 'messages', icon: 'msg' },
   { href: '/app/notifications', key: 'notifications', icon: 'bell', dot: true },
   { href: '/app/profile', key: 'profile', icon: 'user' },
+  { href: '/app/help', key: 'help', icon: 'info' },
   { href: '/app/settings', key: 'settings', icon: 'settings' },
 ];
 const ADMIN: Item[] = [
@@ -52,6 +53,7 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
   const router = useRouter();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
   const role = kind === 'admin' ? 'ADMIN' : 'STUDENT';
   const items = kind === 'admin' ? ADMIN : STUDENT;
   const { data: ov } = useQuery<{ unread: number }>(kind === 'student' && user?.role === 'STUDENT' ? `/me/overview?locale=${locale}` : null);
@@ -90,7 +92,6 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
   const Foot = () => (
     <div className="space-y-3 border-t border-navy/10 p-4">
       <p className="truncate text-sm font-semibold text-navy">{user.firstName} {user.lastName}</p>
-      <div className="flex items-center gap-2"><LangSwitch /><PwaClient /></div>
       <div className="flex gap-2">
         <Link href="/" className="btn btn-ghost h-9 flex-1 px-3 text-xs">{t('site')}</Link>
         <button className="btn btn-ghost h-9 px-3 text-xs" onClick={async () => { await logout(); router.replace('/login'); }} aria-label={a('logout')}><Icon name="logout" className="h-4 w-4" /></button>
@@ -108,11 +109,25 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
         <Foot />
       </aside>
 
-      {/* Telefon: yuqori panel */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-navy/10 bg-white/90 px-3 backdrop-blur lg:hidden">
-        <button className="grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" onClick={() => setOpen(true)} aria-label={t('menu')} aria-expanded={open}><Icon name="menu" /></button>
-        <Brand />
-        <span className="w-10" />
+      {/* Yuqori panel (barcha ekranlarda): menyu, qidiruv, ilovani o'rnatish, til, bildirishnoma, profil */}
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-navy/10 bg-white/95 px-3 backdrop-blur sm:px-6">
+        <button className="grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas lg:hidden" onClick={() => setOpen(true)} aria-label={t('menu')} aria-expanded={open}><Icon name="menu" /></button>
+        <span className="lg:hidden"><Brand /></span>
+        <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) router.push(`/scholarships?q=${encodeURIComponent(q.trim())}`); }} className="relative hidden min-w-0 max-w-md flex-1 md:block" role="search">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"><Icon name="search" className="h-[18px] w-[18px]" /></span>
+          <input className="input !h-10 !pl-10" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('search')} aria-label={t('search')} />
+        </form>
+        <div className="ml-auto flex items-center gap-2">
+          <PwaClient />
+          <LangSwitch />
+          <Link href="/app/notifications" className="relative grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" aria-label={t('notifications')}>
+            <Icon name="bell" />{(ov?.unread ?? 0) > 0 && <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{ov!.unread > 99 ? '99+' : ov!.unread}</span>}
+          </Link>
+          <Link href="/app/profile" className="hidden items-center gap-2 rounded-xl px-1.5 py-1 hover:bg-canvas sm:flex" aria-label={t('profile')}>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-sm font-bold text-white">{(user.firstName?.[0] ?? user.email[0]).toUpperCase()}</span>
+            <span className="hidden max-w-[120px] truncate text-sm font-semibold text-navy xl:block">{user.firstName}</span>
+          </Link>
+        </div>
       </header>
 
       {/* Telefon: chapdan ochiladigan menyu */}

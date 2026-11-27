@@ -11,7 +11,7 @@ const clamp = (v: unknown, d: number, min: number, max: number) => Math.min(max,
 const dir = (v?: string): 'asc' | 'desc' => (v === 'asc' ? 'asc' : 'desc');
 const day = (d: Date) => d.toISOString().slice(0, 10);
 const csv = (v: unknown) => { let s = String(v ?? ''); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return `"${s.replace(/"/g, '""')}"`; };
-const SECTION: Record<string, string> = { Scholarship: 'grants', User: 'users', Review: 'reviews', Ticket: 'tickets', Country: 'catalog', Category: 'catalog', Freshness: 'fresh', Conversation: 'chat', Broadcast: 'chat', Auth: 'auth', Program: 'fresh' };
+const SECTION: Record<string, string> = { Scholarship: 'grants', User: 'users', Review: 'reviews', Ticket: 'tickets', Country: 'catalog', Category: 'catalog', Freshness: 'fresh', Conversation: 'chat', Broadcast: 'chat', Auth: 'auth', Program: 'fresh', Complaint: 'complaints' };
 const sectionOf = (entity: string) => SECTION[entity] ?? 'other';
 const NEXT: Record<ScholarshipStatus, ScholarshipStatus[]> = {
   DRAFT: ['PENDING', 'PUBLISHED', 'ARCHIVED'], PENDING: ['PUBLISHED', 'REJECTED', 'DRAFT'], PUBLISHED: ['ARCHIVED', 'EXPIRED', 'DRAFT'],
@@ -30,6 +30,16 @@ class TicketPatchDto {
   @IsOptional() @IsIn(['NEW', 'IN_PROGRESS', 'ANSWERED', 'CLOSED']) stage?: 'NEW' | 'IN_PROGRESS' | 'ANSWERED' | 'CLOSED';
   @IsOptional() @IsIn(['LOW', 'NORMAL', 'HIGH']) priority?: 'LOW' | 'NORMAL' | 'HIGH';
   @IsOptional() @IsString() assigneeId?: string | null;
+}
+class ComplaintCreateDto {
+  @IsIn(['REVIEW', 'USER', 'GRANT', 'OTHER']) kind: 'REVIEW' | 'USER' | 'GRANT' | 'OTHER';
+  @IsOptional() @IsString() @MaxLength(254) targetEmail?: string;
+  @IsString() @MinLength(3) @MaxLength(120) subject: string;
+  @IsString() @MinLength(10) @MaxLength(3000) text: string;
+}
+class ComplaintPatchDto {
+  @IsOptional() @IsIn(['OPEN', 'REVIEWING', 'RESOLVED', 'DISMISSED']) status?: 'OPEN' | 'REVIEWING' | 'RESOLVED' | 'DISMISSED';
+  @IsOptional() @IsString() @MaxLength(2000) resolution?: string;
 }
 class ReplyDto { @IsString() @MinLength(2) @MaxLength(4000) body: string }
 class ReviewDto { @IsIn(['PENDING', 'APPROVED', 'REJECTED', 'HIDDEN']) status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'HIDDEN' }
@@ -73,13 +83,14 @@ export class PanelController {
 
   // ================= STATISTIKA =================
   @Get('counters') async counters() {
-    const [tickets, reviews, grants, chats] = await Promise.all([
+    const [tickets, reviews, grants, chats, complaints] = await Promise.all([
       this.db.contactMessage.count({ where: { stage: 'NEW' } }),
       this.db.review.count({ where: { status: 'PENDING' } }),
       this.db.scholarship.count({ where: { status: 'PENDING' } }),
       this.db.chatMessage.count({ where: { fromAdmin: false, readAt: null, conversation: { archived: false } } }),
+      this.db.complaint.count({ where: { status: { in: ['OPEN', 'REVIEWING'] } } }),
     ]);
-    return { tickets, reviews, grants, chats };
+    return { tickets, reviews, grants, chats, complaints };
   }
 
   @Get('dashboard') async dashboard(@Query('days') daysQ?: string) {
@@ -383,6 +394,40 @@ export class PanelController {
     return '﻿' + [head.join(','), ...rows.map((r) => [r.createdAt.toISOString(), nm.get(r.actorId ?? '')?.email, r.action, r.section ?? sectionOf(r.entity), `${r.entity}${r.entityId ? ':' + r.entityId : ''}`, r.ip, r.userAgent, r.result].map(csv).join(','))].join('\n');
   }
 
+  // ================= SHIKOYATLAR (foydalanuvchilar o'rtasidagi muammolar) =================
+  @Get('complaints') async complaints(@Query() q: any) {
+    const page = clamp(q.page, 1, 1, 100000), limit = clamp(q.limit, 10, 5, 100);
+    const where: Prisma.ComplaintWhereInput = {
+      ...(q.status ? { status: q.status } : {}), ...(q.kind ? { kind: String(q.kind) } : {}),
+      ...(q.q ? { OR: [{ subject: { contains: String(q.q), mode: 'insensitive' } }, { text: { contains: String(q.q), mode: 'insensitive' } }, { reporter: { email: { contains: String(q.q), mode: 'insensitive' } } }] } : {}),
+    };
+    const [total, rows, grp] = await Promise.all([
+      this.db.complaint.count({ where }),
+      this.db.complaint.findMany({ where, orderBy: { [['createdAt', 'num', 'status'].includes(q.sort) ? q.sort : 'createdAt']: dir(q.dir) }, skip: (page - 1) * limit, take: limit, include: { reporter: { select: { id: true, firstName: true, lastName: true, email: true } }, target: { select: { id: true, firstName: true, lastName: true, email: true, blockedAt: true } } } }),
+      this.db.complaint.groupBy({ by: ['status'], _count: true }),
+    ]);
+    const counts: Record<string, number> = {};
+    for (const g of grp) counts[g.status] = g._count;
+    return { total, page, limit, pages: Math.max(1, Math.ceil(total / limit)), counts, items: rows };
+  }
+  @Get('complaints/:id') async complaint(@Param('id', ParseUUIDPipe) id: string) {
+    const c = await this.db.complaint.findUnique({ where: { id }, include: { reporter: { select: { id: true, firstName: true, lastName: true, email: true } }, target: { select: { id: true, firstName: true, lastName: true, email: true, blockedAt: true } } } });
+    if (!c) throw new NotFoundException();
+    return c;
+  }
+  @Patch('complaints/:id') async patchComplaint(@CurrentUser() a: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body() d: ComplaintPatchDto, @Req() req: any) {
+    const cur = await this.db.complaint.findUnique({ where: { id } });
+    if (!cur) throw new NotFoundException();
+    const closing = d.status === 'RESOLVED' || d.status === 'DISMISSED';
+    if (closing && !(d.resolution ?? cur.resolution)?.trim()) throw new BadRequestException('resolution_required');
+    const c = await this.db.complaint.update({ where: { id }, data: { ...(d.status ? { status: d.status } : {}), ...(d.resolution !== undefined ? { resolution: d.resolution.trim() } : {}), ...(closing ? { resolvedById: a.id, resolvedAt: new Date() } : {}) } });
+    await this.audit(a, `COMPLAINT_${d.status ?? 'EDIT'}`, 'Complaint', id, req);
+    if (closing) {
+      await this.db.notification.create({ data: { userId: cur.reporterId, type: 'SYSTEM', dedupeKey: `cmp:${id}:${Date.now()}`, payload: { title: `#${cur.num} · ${cur.subject}`, body: c.resolution ?? '' } } }).catch(() => undefined);
+    }
+    return c;
+  }
+
   // ================= XABARLAR (admin ↔ talaba) =================
   @Get('chat/conversations') async conversations(@Query() q: any) {
     const where: Prisma.ConversationWhereInput = {
@@ -455,5 +500,23 @@ export class StudentChatController {
   }
 }
 
-@Module({ controllers: [PanelController, StudentChatController] })
+/** Talaba tomoni: shikoyat/nizo yuborish va holatini kuzatish */
+@UseGuards(JwtAuthGuard)
+@Controller('me/complaints')
+export class StudentComplaintsController {
+  constructor(private db: PrismaService) {}
+  @Get() mine(@CurrentUser() u: AuthUser) {
+    return this.db.complaint.findMany({ where: { reporterId: u.id }, orderBy: { createdAt: 'desc' }, take: 50, select: { id: true, num: true, kind: true, subject: true, text: true, status: true, resolution: true, createdAt: true, resolvedAt: true } });
+  }
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  @Post() @HttpCode(200) async create(@CurrentUser() u: AuthUser, @Body() d: ComplaintCreateDto) {
+    const email = d.targetEmail?.trim().toLowerCase();
+    const target = email ? await this.db.user.findUnique({ where: { email }, select: { id: true } }) : null;
+    if (target?.id === u.id) throw new BadRequestException('complaint_self');
+    const c = await this.db.complaint.create({ data: { reporterId: u.id, targetUserId: target?.id, kind: d.kind, subject: d.subject.trim(), text: d.text.trim() } });
+    return { id: c.id, num: c.num };
+  }
+}
+
+@Module({ controllers: [PanelController, StudentChatController, StudentComplaintsController] })
 export class PanelModule {}

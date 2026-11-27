@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { api, ApiError, useQuery } from '@/lib/client';
 import { useErr } from '@/components/ui';
+import { LANG_NAMES } from '@/components/LangSwitch';
 import { Avatar, Badge, Col, Confirm, DataTable, Drawer, IconBtn, PageTitle, Pagination, Panel, SearchBox, Select, Skeleton, useDateFmt, useL, useTable, useToast } from '@/components/admin/kit';
 
 interface Row { id: string; email: string; firstName: string; lastName: string; role: 'STUDENT' | 'ADMIN'; createdAt: string; lastActiveAt: string | null; blockedAt: string | null; emailVerifiedAt: string | null }
@@ -93,7 +94,7 @@ export default function AdminUsers() {
                 {info(L("Ro'yxatdan o'tgan", 'Регистрация', 'Joined'), f.dt(d.user.createdAt))}
                 {info(L('Oxirgi faollik', 'Активность', 'Last active'), f.dt(d.user.lastActiveAt))}
                 {info(L('Email tasdiqlangan', 'Email подтверждён', 'Email verified'), d.user.emailVerifiedAt ? f.date(d.user.emailVerifiedAt) : L('Yo‘q', 'Нет', 'No'))}
-                {info(L('Til', 'Язык', 'Language'), d.user.locale.toUpperCase())}
+                {info(L('Til', 'Язык', 'Language'), LANG_NAMES[d.user.locale] ?? d.user.locale)}
                 {info(L('Telefon', 'Телефон', 'Phone'), p?.phone)}{info(L('Davlat', 'Страна', 'Country'), p?.country)}
                 {info(L('Faol sessiyalar', 'Активные сессии', 'Active sessions'), d.sessions)}{info(L('Sharhlar', 'Отзывы', 'Reviews'), d.reviews)}
               </dl>

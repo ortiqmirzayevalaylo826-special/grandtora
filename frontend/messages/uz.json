@@ -6,6 +6,7 @@
     "home": "Bosh sahifa",
     "install": "Ilovani o'rnatish",
     "iosHint": "Safari'da «Ulashish» → «Bosh ekranga qo'shish» ni bosing.",
+    "installHint": "Brauzer menyusidan «Ilovani o'rnatish» yoki «Bosh ekranga qo'shish» ni tanlang.",
     "programs": "Dasturlar",
     "countries": "Davlatlar",
     "stories": "Hikoyalar",
@@ -218,6 +219,9 @@
     "generic": "Xatolik yuz berdi. Qayta urinib ko'ring.",
     "network": "Internet aloqasi yo'q yoki server javob bermayapti.",
     "invalid_credentials": "Email yoki parol noto'g'ri",
+    "account_blocked": "Hisobingiz bloklangan. Administrator bilan bog'laning.",
+    "resolution_required": "Qaror matnini yozing",
+    "complaint_self": "O'zingiz ustidan shikoyat qilib bo'lmaydi",
     "locked": "Juda ko'p urinish. 15 daqiqadan keyin qayta urinib ko'ring.",
     "otp_wrong": "Kod noto'g'ri",
     "otp_expired": "Kod eskirgan yoki so'ralmagan",
@@ -263,6 +267,8 @@
     "a_catalog": "Davlat va kategoriya",
     "a_audit": "Audit jurnali",
     "messages": "Xabarlar",
+    "search": "Grant, dastur yoki universitet qidirish…",
+    "help": "Qo'llanma va yordam",
     "a_messages": "Murojaatlar"
   },
   "status": {

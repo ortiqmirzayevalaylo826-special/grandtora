@@ -66,7 +66,6 @@ HTTPS saytda (Render beradi) Chrome/Edge: manzil satrida «O'rnatish» yoki sayt
 | Rol | Email | Izoh |
 | --- | --- | --- |
 | ADMIN (haqiqiy) | `ADMIN_EMAIL` (ortiqmirzayevalaylo826@gmail.com) | Parol: Render'dagi `ADMIN_PASSWORD` |
-| ADMIN (demo) | demo.admin@grantora.demo | Admin panelni sinash |
 | STUDENT | demo.student1@grantora.demo | Madina Karimova: profil, saqlanganlar, arizalar, bildirishnomalar |
 | STUDENT | demo.student2@grantora.demo | Jasur Rahimov: bo'sh akkaunt |
 | Bloklangan | demo.blocked@grantora.demo | Kirishda bloklanganlik xabari |

@@ -75,6 +75,7 @@ export class AuthService {
     const u = await this.db.user.findUnique({ where: { email } });
     const ok = await bcrypt.compare(password, u?.passwordHash ?? DUMMY_HASH);
     if (u?.lockedUntil && u.lockedUntil > new Date()) throw new HttpException('locked', HttpStatus.TOO_MANY_REQUESTS);
+    if (u && ok && u.emailVerifiedAt && u.blockedAt) throw new UnauthorizedException('account_blocked'); // parol to'g'ri bo'lsa, bloklanganini ochiq aytamiz
     if (!u || !ok || !u.emailVerifiedAt || u.blockedAt) {
       if (u) {
         const n = u.failedLogins + 1;

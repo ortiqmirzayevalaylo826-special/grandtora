@@ -105,7 +105,7 @@ export default function ScholarshipForm({ id }: { id?: string }) {
         <div className="mb-4 flex gap-2" role="tablist">
           {LOCALES.map((l) => (
             <button type="button" key={l} role="tab" aria-selected={tab === l} onClick={() => setTab(l)}
-              className={`btn h-9 px-4 text-xs ${tab === l ? 'btn-primary' : 'btn-ghost'}`}>{l.toUpperCase()}{tr[l].title && ' ✓'}</button>
+              className={`btn h-9 px-4 text-xs ${tab === l ? 'btn-primary' : 'btn-ghost'}`}>{({ uz: "O'zbekcha", ru: 'Русский', en: 'English' } as Record<string, string>)[l] ?? l}{tr[l].title && ' ✓'}</button>
           ))}
         </div>
         <div className="grid gap-4">

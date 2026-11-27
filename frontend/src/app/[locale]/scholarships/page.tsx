@@ -14,6 +14,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: t('title') };
 }
 
+const langName = (code: string, loc: string) => { try { const n = new Intl.DisplayNames([loc], { type: 'language' }).of(code.toLowerCase()); return n ? n.charAt(0).toUpperCase() + n.slice(1) : code; } catch { return code; } };
+
 export default async function Catalog({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SP> }) {
   const { locale } = await params;
   const sp = await searchParams;
@@ -72,7 +74,7 @@ export default async function Catalog({ params, searchParams }: { params: Promis
               <label className="mb-2 block text-sm font-bold text-navy" htmlFor="lg">{t('catalog.lang')}</label>
               <select id="lg" name="lang" className="input" defaultValue={one(sp.lang)}>
                 <option value="">{t('catalog.any')}</option>
-                {['EN', 'DE', 'TR', 'KO', 'JA', 'FR'].map((l) => <option key={l} value={l}>{l}</option>)}
+                {['EN', 'DE', 'TR', 'KO', 'JA', 'FR'].map((l) => <option key={l} value={l}>{langName(l, locale)}</option>)}
               </select>
             </div>
             <div>
