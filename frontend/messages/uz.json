@@ -241,7 +241,8 @@
     "cannot_block_self": "O'zingizni bloklab bo'lmaydi",
     "translation_required": "Kamida bitta tilda tarjima kerak",
     "duplicate_locale": "Til takrorlandi",
-    "admin_cannot_self_delete": "Admin hisobini o'chirib bo'lmaydi"
+    "admin_cannot_self_delete": "Admin hisobini o'chirib bo'lmaydi",
+    "mail_failed": "Xat yuborib bo'lmadi. Pochta sozlamalarida muammo bor: birozdan keyin qayta urinib ko'ring yoki parol bilan kiring."
   },
   "shell": {
     "overview": "Bosh sahifa",

@@ -6,6 +6,7 @@ import { CountryTile, ProgramCard, StoryCard } from '@/components/cards';
 import { Icon } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'default-cache'; // ma'lumot 60 soniya keshlanadi: sahifa API'ni kutmaydi
 
 const QUICK = ['Erasmus+', 'DAAD', 'Fulbright', 'Chevening'];
 

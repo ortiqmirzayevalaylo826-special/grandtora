@@ -132,7 +132,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </form>
           <div className="ml-auto flex items-center gap-2" ref={popRef}>
             <span className="hidden md:block"><PwaClient /></span>
-            <span className="hidden md:block"><LangSwitch /></span>
+            <LangSwitch />
             <div className="relative">
               <button className="relative grid h-10 w-10 place-items-center rounded-xl hover:bg-canvas" onClick={() => { setBell((v) => !v); setMenu(false); }} aria-label={L('Bildirishnomalar', 'Уведомления', 'Notifications')} aria-expanded={bell}>
                 <Icon name="bell" />{total > 0 && <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{total > 99 ? '99+' : total}</span>}

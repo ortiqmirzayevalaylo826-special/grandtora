@@ -4,6 +4,7 @@ import { PublicStats, apiGet } from '@/lib/api';
 import { Icon } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'default-cache'; // ma'lumot 60 soniya keshlanadi: sahifa API'ni kutmaydi
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

@@ -93,7 +93,7 @@ async function main() {
     const data = { name: st.name, university: st.uni, countryCode: st.c, program: st.program, sortOrder: i, isSample: true, i18n: { uz: st.uz, ru: st.ru, en: st.en } };
     await db.story.upsert({ where: { slug: st.slug }, update: {}, create: { slug: st.slug, ...data } });
   }
-  if (process.env.SEED_DEMO_USERS === 'true') await demoUsers(db);
+  if (process.env.SEED_DEMO_USERS !== 'false') await demoUsers(db); // demo ma'lumotlar standart holda yoqilgan; o'chirish: SEED_DEMO_USERS=false
   console.log('Seed tugadi.');
 }
 main().finally(() => db.$disconnect());

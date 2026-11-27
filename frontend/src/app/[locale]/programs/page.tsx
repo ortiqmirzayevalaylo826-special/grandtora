@@ -4,6 +4,7 @@ import { Program, apiGet } from '@/lib/api';
 import { ProgramCard } from '@/components/cards';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'default-cache'; // ma'lumot 60 soniya keshlanadi: sahifa API'ni kutmaydi
 const KINDS = ['EXCHANGE', 'DEGREE', 'SUMMER', 'RESEARCH', 'YOUTH'];
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {

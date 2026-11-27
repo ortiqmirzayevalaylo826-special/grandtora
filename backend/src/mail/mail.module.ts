@@ -45,11 +45,11 @@ export class MailService {
     return m ? { name: m[1].trim() || 'Grantora', email: m[2].trim() } : { name: 'Grantora', email: this.from.trim() };
   }
 
-  private async send(to: string, subject: string, text: string) {
+  private async send(to: string, subject: string, text: string): Promise<{ ok: boolean; error?: string }> {
     try {
       if (this.provider === 'gmail') {
         const url = process.env.EMAIL_RELAY_URL;
-        if (!url) return this.log.error('EMAIL_RELAY_URL sozlanmagan');
+        if (!url) { this.log.error('EMAIL_RELAY_URL sozlanmagan'); return { ok: false, error: 'EMAIL_RELAY_URL sozlanmagan' }; }
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'content-type': 'text/plain;charset=utf-8' }, // Apps Script uchun oddiy so'rov (preflight yo'q)
@@ -58,8 +58,8 @@ export class MailService {
           signal: AbortSignal.timeout(15_000),
         });
         const j = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
-        if (!res.ok || !j?.ok) this.log.error(`Gmail ko'prigi xato ${res.status}: ${j?.error ?? 'javob yo\'q'}`);
-        return;
+        if (!res.ok || !j?.ok) { const m = `Gmail ko'prigi xato ${res.status}: ${j?.error ?? 'javob yo\'q'}`; this.log.error(m); return { ok: false, error: m }; }
+        return { ok: true };
       }
       if (this.provider === 'brevo') {
         const res = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -68,15 +68,25 @@ export class MailService {
           body: JSON.stringify({ sender: this.parseFrom(), to: [{ email: to }], subject, textContent: text }),
           signal: AbortSignal.timeout(10_000),
         });
-        if (!res.ok) this.log.error(`Brevo xato ${res.status}: ${(await res.text()).slice(0, 200)}`);
-        return;
+        if (!res.ok) { const m = `Brevo xato ${res.status}: ${(await res.text()).slice(0, 200)}`; this.log.error(m); return { ok: false, error: m }; }
+        return { ok: true };
       }
       await this.tx.sendMail({ from: this.from, to, subject, text });
+      return { ok: true };
     } catch (e) {
       // Kod/parol logga yozilmaydi — faqat xato turi
-      this.log.error(`Email yuborilmadi (${this.provider}): ${(e as Error).message}`);
+      const m = `Email yuborilmadi (${this.provider}): ${(e as Error).message}`;
+      this.log.error(m);
+      return { ok: false, error: m };
     }
   }
+  /** Admin diagnostikasi uchun: sozlama holati (maxfiy qiymatlarsiz). */
+  status() {
+    const relay = !!process.env.EMAIL_RELAY_URL, token = !!process.env.EMAIL_RELAY_TOKEN, brevo = !!process.env.BREVO_API_KEY, smtp = !!process.env.SMTP_HOST;
+    const configured = this.provider === 'gmail' ? relay && token : this.provider === 'brevo' ? brevo : smtp;
+    return { provider: this.provider, from: this.from, configured, relayUrl: relay, relayToken: token, brevoKey: brevo, smtpHost: smtp };
+  }
+  async test(to: string) { return this.send(to, 'Grantora: test xat', 'Grantora\n\nBu pochta ulanishini tekshirish uchun test xat. Agar uni ko\'rayotgan bo\'lsangiz, hammasi ishlayapti.'); }
   sendOtp(to: string, code: string, locale = 'uz') {
     const [s, b] = (T[locale] ?? T.uz).otp(code);
     return this.send(to, s, b);

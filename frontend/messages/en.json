@@ -241,7 +241,8 @@
     "cannot_block_self": "You can't block yourself",
     "translation_required": "At least one translation is required",
     "duplicate_locale": "Duplicate language",
-    "admin_cannot_self_delete": "An admin account can't be deleted"
+    "admin_cannot_self_delete": "An admin account can't be deleted",
+    "mail_failed": "Could not send the email. Mail is misconfigured: try again later or sign in with your password."
   },
   "shell": {
     "overview": "Home",

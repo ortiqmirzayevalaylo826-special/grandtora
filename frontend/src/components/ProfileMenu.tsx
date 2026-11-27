@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { useAuth } from '@/lib/auth';
 import { useL } from './admin/kit';
-import LangSwitch from './LangSwitch';
 import PwaClient from './PwaClient';
 import UserAvatar from './UserAvatar';
 import { Icon } from './ui';
@@ -44,7 +43,7 @@ export default function ProfileMenu({ profileHref, settingsHref, admin = false }
           {!admin && <Link href="/app/help" className={row} role="menuitem"><Icon name="info" className="h-5 w-5 text-muted" />{L("Yordam va qo'llanma", 'Помощь и руководство', 'Help & guide')}</Link>}
           <Link href="/" className={row} role="menuitem"><Icon name="external" className="h-5 w-5 text-muted" />{L('Saytga qaytish', 'На сайт', 'Back to site')}</Link>
           {/* Telefonda til va o'rnatish tugmalari shu yerda (yuqori panelda joy tor) */}
-          <div className="space-y-2 px-1 py-2 md:hidden"><LangSwitch className="w-full" /><PwaClient full /></div>
+          <div className="px-1 py-2 md:hidden"><PwaClient full /></div>
           <div className="my-1 border-t border-navy/10" />
           <button type="button" role="menuitem" className={`${row} w-full text-red-700 hover:!bg-red-50`} onClick={async () => { setOpen(false); await logout(); router.replace('/login'); }}><Icon name="logout" className="h-5 w-5" />{L('Chiqish', 'Выйти', 'Log out')}</button>
         </div>

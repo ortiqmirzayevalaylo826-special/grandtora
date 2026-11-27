@@ -4,6 +4,7 @@ import { Paged, Scholarship, apiGet } from '@/lib/api';
 import ScholarshipCard from '@/components/ScholarshipCard';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'default-cache'; // ma'lumot 60 soniya keshlanadi: sahifa API'ni kutmaydi
 
 type SP = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v.join(',') : v ?? '');

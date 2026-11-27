@@ -33,7 +33,11 @@ export class AuthService {
     await this.db.otpCode.updateMany({ where: { email, purpose, consumedAt: null }, data: { consumedAt: new Date() } });
     const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
     await this.db.otpCode.create({ data: { email, purpose, codeHash: this.hmac(email, purpose, code), expiresAt: new Date(Date.now() + OTP_TTL_MS) } });
-    await this.mail.sendOtp(email, code, locale);
+    const sent = await this.mail.sendOtp(email, code, locale);
+    if (!sent.ok) { // xat ketmadi: kodni bekor qilamiz, foydalanuvchi darhol qayta urinib ko'ra olsin va aniq xabar ko'rsin
+      await this.db.otpCode.deleteMany({ where: { email, purpose, consumedAt: null } });
+      throw new HttpException('mail_failed', HttpStatus.SERVICE_UNAVAILABLE);
+    }
   }
 
   private async checkOtp(email: string, purpose: OtpPurpose, code: string) {

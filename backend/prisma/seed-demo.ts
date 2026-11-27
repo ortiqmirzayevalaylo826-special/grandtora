@@ -48,5 +48,30 @@ export async function demoUsers(db: PrismaClient) {
   const k1 = `demo-${s1.id}-7`, k2 = `demo-${s1.id}-sys`;
   if (d) await db.notification.upsert({ where: { dedupeKey: k1 }, update: {}, create: { userId: s1.id, type: 'DEADLINE_REMINDER', dedupeKey: k1, payload: { scholarshipId: d.id, slug: d.slug, level: 7 } } });
   await db.notification.upsert({ where: { dedupeKey: k2 }, update: {}, create: { userId: s1.id, type: 'SYSTEM', dedupeKey: k2, payload: {} } });
+  // ---- Demo kontent: admin paneli bo'sh ko'rinmasligi uchun (takroran ishga tushirilsa ham ikkilanmaydi) ----
+  const s2 = await db.user.findUnique({ where: { email: 'demo.student2@grantora.demo' } });
+  const ch = by('chevening');
+  if (d && !(await db.review.findFirst({ where: { userId: s1.id, scholarshipId: d.id } }))) {
+    await db.review.create({ data: { userId: s1.id, scholarshipId: d.id, stars: 5, text: "Ma'lumotlar aniq va tushunarli, hujjatlar ro'yxati juda yordam berdi.", status: 'APPROVED' } });
+  }
+  if (ch && s2 && !(await db.review.findFirst({ where: { userId: s2.id, scholarshipId: ch.id } }))) {
+    await db.review.create({ data: { userId: s2.id, scholarshipId: ch.id, stars: 4, text: "Yaxshi grant, lekin ariza muddati juda yaqin ekan. Ko'proq eslatma bo'lsa yaxshi.", status: 'PENDING' } });
+  }
+  const adm = await db.user.findFirst({ where: { role: 'ADMIN' }, orderBy: { createdAt: 'asc' } });
+  if (adm) {
+    const conv = await db.conversation.upsert({ where: { studentId: s1.id }, update: {}, create: { studentId: s1.id } });
+    if ((await db.chatMessage.count({ where: { conversationId: conv.id } })) === 0) {
+      const t = (min: number) => new Date(Date.now() - min * 60_000);
+      await db.chatMessage.createMany({ data: [
+        { conversationId: conv.id, senderId: s1.id, fromAdmin: false, body: "Assalomu alaykum! DAAD uchun IELTS shartmi?", createdAt: t(180), readAt: t(170) },
+        { conversationId: conv.id, senderId: adm.id, fromAdmin: true, body: "Va alaykum assalom! Ko'p dasturlar uchun ingliz yoki nemis tili sertifikati kerak. Grant sahifasidagi talablarni tekshiring.", createdAt: t(170), readAt: t(160) },
+        { conversationId: conv.id, senderId: s1.id, fromAdmin: false, body: "Rahmat! Hujjatlarni yuklab qo'yaman.", createdAt: t(20) },
+      ] });
+      await db.conversation.update({ where: { id: conv.id }, data: { lastMessageAt: t(20) } });
+    }
+  }
+  if (s2 && !(await db.complaint.findFirst({ where: { reporterId: s2.id } }))) {
+    await db.complaint.create({ data: { reporterId: s2.id, kind: 'GRANT', subject: "Grant muddati noto'g'ri ko'rsatilgan", text: "Chevening sahifasida muddat o'tib ketgan, lekin rasmiy saytda hali ochiq. Iltimos, tekshirib ko'ring." } });
+  }
   console.log('Demo foydalanuvchilar tayyor:', DEMO_ACCOUNTS.map((a) => a.email).join(', '));
 }

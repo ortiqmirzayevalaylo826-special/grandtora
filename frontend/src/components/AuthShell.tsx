@@ -5,6 +5,7 @@ import { useQuery } from '@/lib/client';
 import { Icon } from './ui';
 import LangSwitch from './LangSwitch';
 import PwaClient from './PwaClient';
+import SiteMenu from './SiteMenu';
 
 /** Kirish/ro'yxatdan o'tish: chapda TO'LIQ rasm (ustida yengil gradient va matn), o'ngda forma.
  *  Tilni almashtirish va "Ilovani o'rnatish" tugmalari yuqorida doim ko'rinadi. Telefonda chap panel ixcham rasmli banner. */
@@ -22,9 +23,11 @@ export default function AuthShell({ mode, children }: { mode: 'login' | 'registe
   ];
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-accent/60 via-canvas to-white sm:px-4 sm:py-6 lg:justify-center">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-2 px-4 py-3 sm:px-0 sm:pb-3 sm:pt-0">
-        <PwaClient />
-        <LangSwitch />
+      <div className="mx-auto flex w-full max-w-5xl items-center gap-2 px-4 py-3 sm:px-0 sm:pb-3 sm:pt-0">
+        <SiteMenu />
+        <Link href="/" aria-label="Grantora" className="ml-1 hidden font-head text-lg font-extrabold text-navy sm:block">Grantora</Link>
+        <span className="ml-auto hidden md:block"><PwaClient /></span>
+        <span className="ml-auto md:ml-0"><LangSwitch /></span>
       </div>
       <div className="mx-auto grid w-full max-w-5xl overflow-hidden bg-white shadow-card sm:rounded-[28px] sm:border sm:border-navy/10 lg:min-h-[640px] lg:grid-cols-[0.92fr_1.08fr]">
         {/* Chap panel: rasm to'liq ko'rinadi, matn uning ustida */}

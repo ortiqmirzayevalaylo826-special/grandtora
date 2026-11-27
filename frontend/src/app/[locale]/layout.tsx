@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ['latin', 'cyrillic'], variable: '--font-inter' }
 const head = Manrope({ subsets: ['latin', 'cyrillic'], variable: '--font-head', weight: ['600', '700', '800'] });
 
 export const metadata: Metadata = { title: { default: BRAND.name, template: `%s — ${BRAND.name}` }, description: 'Scholarships and grants from around the world', icons: { icon: [{ url: '/icons/favicon-64.png', sizes: '64x64', type: 'image/png' }, { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }], apple: '/icons/apple-touch-icon.png' }, appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: 'default' } };
-export const viewport = { themeColor: '#087F5B', width: 'device-width', initialScale: 1 };
+export const viewport = { themeColor: '#087F5B', width: 'device-width', initialScale: 1, maximumScale: 1, userScalable: false };
 export function generateStaticParams() { return routing.locales.map((locale) => ({ locale })); }
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {

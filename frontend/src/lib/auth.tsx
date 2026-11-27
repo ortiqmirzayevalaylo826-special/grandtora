@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { api, refreshSession } from './client';
+import { api, clearQueryCache, refreshSession } from './client';
 
 export interface AuthUser { id: string; email: string; role: 'STUDENT' | 'ADMIN'; firstName: string; lastName: string; locale: string; avatar?: string | null }
 interface Ctx { user: AuthUser | null | undefined; setUser: (u: AuthUser | null) => void; logout: () => Promise<void> }
@@ -19,7 +19,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
     return () => { off = true; };
   }, []);
-  const logout = useCallback(async () => { await api('/auth/logout', { method: 'POST' }).catch(() => null); setUser(null); }, []);
+  useEffect(() => { clearQueryCache(); }, [user?.id]);
+  const logout = useCallback(async () => { await api('/auth/logout', { method: 'POST' }).catch(() => null); clearQueryCache(); setUser(null); }, []);
   const value = useMemo(() => ({ user, setUser, logout }), [user, logout]);
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }

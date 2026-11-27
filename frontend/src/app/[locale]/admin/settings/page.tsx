@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { useAuth } from '@/lib/auth';
 import { PageTitle, Tabs, useL } from '@/components/admin/kit';
+import MailCheck from '@/components/MailCheck';
 import LockSettings from '@/components/LockSettings';
 import LangSwitch from '@/components/LangSwitch';
 import PwaClient from '@/components/PwaClient';
@@ -36,9 +37,12 @@ export default function AdminSettings() {
         </div>
       )}
       {tab === 'app' && (
+        <div className="space-y-5">
         <Card title={L('Til va ilova', 'Язык и приложение', 'Language & app')} hint={L("Tanlangan til butun saytga qo'llanadi. Ilovani o'rnatsangiz, telefoningizda alohida ochiladi.", 'Выбранный язык действует на всём сайте. Установленное приложение открывается отдельно.', 'The chosen language applies site-wide. An installed app opens on its own.')}>
-          <div className="flex flex-wrap gap-3"><LangSwitch /><PwaClient /></div>
+          <div className="flex flex-wrap gap-3"><LangSwitch full /><PwaClient /></div>
         </Card>
+        <Card title={L('Pochta (email) holati', 'Состояние почты', 'Email status')} hint={L('Kirish kodlari shu orqali yuboriladi. Kod kelmasa, sababi shu yerda ko‘rinadi.', 'Коды входа отправляются через неё. Если код не приходит, причина будет здесь.', 'Login codes are sent through it. If codes do not arrive, the reason shows here.')}><MailCheck /></Card>
+        </div>
       )}
     </div>
   );

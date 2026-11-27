@@ -13,7 +13,7 @@ export default function NotificationBell({ unread, onChange }: { unread: number;
   const [open, setOpen] = useState(false);
   const [only, setOnly] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const inbox = useInbox({ list: open });
+  const inbox = useInbox({ list: open, enabled: open });
   useEffect(() => {
     if (!open) return;
     const down = (e: MouseEvent | TouchEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };

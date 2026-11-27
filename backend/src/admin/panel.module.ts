@@ -82,6 +82,14 @@ export class PanelController {
   }
 
   // ================= STATISTIKA =================
+  @Get('mail/status') mailStatus() { return this.mail.status(); }
+  @Post('mail/test') @HttpCode(200) async mailTest(@CurrentUser() a: AuthUser) {
+    const u = await this.db.user.findUnique({ where: { id: a.id }, select: { email: true } });
+    if (!u) throw new NotFoundException();
+    const r = await this.mail.test(u.email);
+    return { ok: r.ok, error: r.error ?? null, to: u.email };
+  }
+
   @Get('counters') async counters() {
     const [tickets, reviews, grants, chats, complaints] = await Promise.all([
       this.db.contactMessage.count({ where: { stage: 'NEW' } }),

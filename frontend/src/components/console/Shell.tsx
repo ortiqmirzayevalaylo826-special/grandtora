@@ -154,7 +154,7 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
         </form>
         <div className="ml-auto flex items-center gap-2">
           <span className="hidden md:block"><PwaClient /></span>
-          <span className="hidden md:block"><LangSwitch /></span>
+          <LangSwitch />
           {kind === 'student' && <NotificationBell unread={ov?.unread ?? 0} onChange={reloadOv} />}
           <ProfileMenu admin={kind === 'admin'} profileHref="/app/profile" settingsHref="/app/settings" />
         </div>

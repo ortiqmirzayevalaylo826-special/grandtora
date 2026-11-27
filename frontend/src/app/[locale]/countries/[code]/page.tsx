@@ -8,6 +8,7 @@ import { ProgramCard } from '@/components/cards';
 import Flag from '@/components/Flag';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'default-cache'; // ma'lumot 60 soniya keshlanadi: sahifa API'ni kutmaydi
 type P = { params: Promise<{ locale: string; code: string }> };
 
 export async function generateMetadata({ params }: P): Promise<Metadata> {

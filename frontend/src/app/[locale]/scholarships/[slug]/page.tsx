@@ -7,6 +7,7 @@ import { SITE_URL } from '@/brand';
 import DetailActions from '@/components/DetailActions';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'default-cache'; // ma'lumot 60 soniya keshlanadi: sahifa API'ni kutmaydi
 
 type P = { params: Promise<{ locale: string; slug: string }> };
 

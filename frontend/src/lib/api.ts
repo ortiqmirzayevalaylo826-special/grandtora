@@ -26,7 +26,7 @@ export interface PublicStats { scholarships: number; countries: number; programs
 /** Render bepul rejasida API uxlab qolishi mumkin (birinchi so'rov ~30-50 s): shuning uchun uzoqroq kutamiz. */
 export async function apiGet<T>(path: string): Promise<T | null> {
   try {
-    const r = await fetch(`${BASE}/api${path}`, { cache: 'no-store', signal: AbortSignal.timeout(25_000) });
+    const r = await fetch(`${BASE}/api${path}`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(25_000) });
     return r.ok ? ((await r.json()) as T) : null;
   } catch {
     return null; // API o'chiq bo'lsa sahifa yiqilmasin

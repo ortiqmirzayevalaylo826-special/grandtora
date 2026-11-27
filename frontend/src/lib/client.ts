@@ -41,20 +41,24 @@ export async function api<T = any>(path: string, o: Opts = {}): Promise<T> {
   return (await r.json().catch(() => null)) as T;
 }
 
-/** Oddiy ma'lumot yuklovchi hook. path=null bo'lsa so'rov yuborilmaydi. */
+const qcache = new Map<string, unknown>();
+/** Chiqishda yoki hisob almashganda: boshqa foydalanuvchi ma'lumoti ko'rinib qolmasin. */
+export const clearQueryCache = () => qcache.clear();
+
+/** Ma'lumot yuklovchi hook. Oldin ko'rilgan sahifa DARHOL ochiladi (kesh), yangisi fonda yuklanib almashadi. path=null bo'lsa so'rov yuborilmaydi. */
 export function useQuery<T = any>(path: string | null) {
-  const [data, setData] = useState<T | null>(null);
+  const [data, setData] = useState<T | null>(() => (path && qcache.has(path) ? (qcache.get(path) as T) : null));
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(!!path);
+  const [loading, setLoading] = useState(!!path && !qcache.has(path));
   const [n, setN] = useState(0);
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   useEffect(() => {
     if (!path) { setLoading(false); return; }
     let off = false;
-    setLoading(true);
+    if (qcache.has(path)) { setData(qcache.get(path) as T); setLoading(false); } else setLoading(true);
     api<T>(path)
-      .then((d) => { if (!off) { setData(d); setError(null); } })
+      .then((d) => { if (!off) { qcache.set(path, d); setData(d); setError(null); } })
       .catch((e: ApiError) => { if (!off) setError(e.code ?? 'generic'); })
       .finally(() => { if (!off) setLoading(false); });
     return () => { off = true; };

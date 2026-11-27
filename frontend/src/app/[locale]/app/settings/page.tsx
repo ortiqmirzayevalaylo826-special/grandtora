@@ -39,7 +39,7 @@ export default function Settings() {
           <Card title={L('Profil rasmi', 'Фото профиля', 'Profile photo')}><AvatarUploader /></Card>
           <Card title={L("Shaxsiy ma'lumotlar", 'Личные данные', 'Personal details')}><NameLangForm /></Card>
           <Card title={L('Ilova', 'Приложение', 'App')} hint={L("Grantora'ni telefon yoki kompyuter bosh ekraniga o'rnating — tezroq ochiladi.", 'Установите Grantora на главный экран — так она открывается быстрее.', 'Install Grantora on your home screen for faster access.')}>
-            <div className="flex flex-wrap gap-3"><LangSwitch /><PwaClient /></div>
+            <div className="flex flex-wrap gap-3"><LangSwitch full /><PwaClient /></div>
           </Card>
         </div>
       )}
