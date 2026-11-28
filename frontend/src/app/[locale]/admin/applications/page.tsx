@@ -10,7 +10,7 @@ interface Detail { id: string; review: string; reviewNote: string | null; motiva
   user: { firstName: string; lastName: string; email: string; profile: Record<string, any> | null }; documents: { id: string; name: string; mime: string; sizeBytes: number }[] }
 const TONE: Record<string, string> = { SUBMITTED: 'amber', IN_REVIEW: 'blue', NEEDS_INFO: 'amber', APPROVED: 'green', REJECTED: 'red' };
 
-export function useReviewLabel() {
+function useReviewLabel() {
   const L = useL();
   return (s: string) => ({ SUBMITTED: L('Yangi', 'Новая', 'New'), IN_REVIEW: L("Ko'rib chiqilmoqda", 'На рассмотрении', 'In review'), NEEDS_INFO: L("Ma'lumot kerak", 'Нужна информация', 'Needs info'), APPROVED: L('Qabul qilindi', 'Одобрена', 'Approved'), REJECTED: L('Rad etildi', 'Отклонена', 'Rejected') } as Record<string, string>)[s] ?? s;
 }
