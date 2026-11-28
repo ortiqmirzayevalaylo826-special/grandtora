@@ -8,7 +8,7 @@ import UserAvatar from './UserAvatar';
 import { Icon } from './ui';
 
 /** Profil tugmasi: bosilganda menyu ochiladi — profil, sozlamalar, til, ilovani o'rnatish va chiqish. */
-export default function ProfileMenu({ profileHref, settingsHref, admin = false, onSite = false }: { profileHref: string; settingsHref: string; admin?: boolean; onSite?: boolean }) {
+export default function ProfileMenu({ profileHref, settingsHref, admin = false, onSite = false, side = false }: { profileHref: string; settingsHref: string; admin?: boolean; onSite?: boolean; side?: boolean }) {
   const L = useL();
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -26,13 +26,21 @@ export default function ProfileMenu({ profileHref, settingsHref, admin = false, 
   const row = 'flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-navy hover:bg-canvas';
   return (
     <div className="relative" ref={ref}>
+      {side ? (
+        <button type="button" className="flex w-full items-center gap-3 rounded-xl p-2 text-left hover:bg-canvas" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup="menu" aria-label={L('Profil', 'Профиль', 'Profile')}>
+          <UserAvatar user={user} />
+          <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold text-navy">{name}</span><span className="block truncate text-xs text-muted">{user.email}</span></span>
+          <Icon name="chevron" className={`h-4 w-4 shrink-0 text-muted transition ${open ? '' : 'rotate-180'}`} />
+        </button>
+      ) : (
       <button type="button" className="flex h-10 items-center gap-2 rounded-xl px-1 hover:bg-canvas sm:pr-2" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup="menu" aria-label={L('Profil', 'Профиль', 'Profile')}>
         <UserAvatar user={user} />
         <span className="hidden max-w-[110px] truncate text-sm font-semibold text-navy xl:block">{user.firstName || 'Admin'}</span>
         <Icon name="chevron" className={`hidden h-4 w-4 text-muted transition sm:block ${open ? 'rotate-180' : ''}`} />
       </button>
+      )}
       {open && (
-        <div role="menu" className="absolute right-0 z-50 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-navy/10 bg-white p-2 shadow-2xl">
+        <div role="menu" className={`absolute z-50 w-72 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-navy/10 bg-white p-2 shadow-2xl ${side ? 'bottom-full left-0 mb-2' : 'right-0 mt-2'}`}>
           <Link href={profileHref} className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-canvas">
             <UserAvatar user={user} />
             <span className="min-w-0"><span className="block truncate text-sm font-bold text-navy">{name}</span><span className="block truncate text-xs text-muted">{user.email}</span></span>

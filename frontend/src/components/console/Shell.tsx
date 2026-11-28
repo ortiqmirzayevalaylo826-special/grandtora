@@ -123,12 +123,8 @@ export default function Shell({ kind, children }: { kind: 'student' | 'admin'; c
     </div>
   );
   const Foot = () => (
-    <div className="space-y-3 border-t border-navy/10 p-4">
-      <p className="truncate text-sm font-semibold text-navy">{user.firstName} {user.lastName}</p>
-      <div className="flex gap-2">
-        <Link href="/" className="btn btn-ghost h-9 flex-1 px-3 text-xs">{t('site')}</Link>
-        <button className="btn btn-ghost h-9 px-3 text-xs" onClick={async () => { await logout(); router.replace('/login'); }} aria-label={a('logout')}><Icon name="logout" className="h-4 w-4" /></button>
-      </div>
+    <div className="border-t border-navy/10 p-3">
+      <ProfileMenu side admin={kind === 'admin'} profileHref="/app/profile" settingsHref="/app/settings" />
     </div>
   );
   const Brand = () => <Link href="/" className="flex shrink-0 items-center gap-2 font-head text-xl font-extrabold text-navy" aria-label={BRAND.name}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/img/logo-mark.png" alt="" width={32} height={32} className="h-8 w-8 shrink-0" /><span className="hidden min-[400px]:inline">{BRAND.name}</span>{kind === 'admin' && <span className="ml-2 rounded-md bg-navy px-1.5 py-0.5 align-middle text-[10px] text-white">ADMIN</span>}</Link>;

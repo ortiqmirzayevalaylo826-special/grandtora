@@ -119,8 +119,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-[72px] flex-col border-r border-[#E5E7EB] bg-white md:flex lg:w-64">
           <div className="flex h-16 items-center justify-center px-3 lg:justify-start lg:px-5"><span className="lg:hidden"><Brand compact /></span><span className="hidden lg:block"><Brand /></span></div>
           <nav className="flex-1 overflow-y-auto px-3 py-2" aria-label="Admin"><div className="lg:hidden"><Nav compact /></div><div className="hidden lg:block"><Nav /></div></nav>
-          <div className="border-t border-[#E5E7EB] p-3 text-center lg:text-left">
-            <Link href="/" className="btn btn-ghost !h-9 w-full !px-0 text-xs lg:!px-3" title={L('Saytga', 'На сайт', 'View site')}><Icon name="external" className="h-4 w-4" /><span className="hidden lg:inline">{L('Saytga qaytish', 'На сайт', 'Back to site')}</span></Link>
+          <div className="border-t border-[#E5E7EB] p-3">
+            <ProfileMenu side admin profileHref="/admin/settings" settingsHref="/admin/settings" />
           </div>
         </aside>
 
@@ -159,7 +159,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <div className="absolute inset-y-0 left-0 flex w-72 max-w-[86%] flex-col bg-white shadow-2xl">
               <DrawerHead badge="ADMIN" onClose={() => setDrawer(false)} />
               <nav className="flex-1 overflow-y-auto px-3 pb-2"><Nav /></nav>
-              <div className="border-t border-[#E5E7EB] p-3"><Link href="/" className="btn btn-ghost w-full">{L('Saytga qaytish', 'На сайт', 'Back to site')}</Link></div>
+              <div className="border-t border-[#E5E7EB] p-3"><ProfileMenu side admin profileHref="/admin/settings" settingsHref="/admin/settings" /></div>
             </div>
           </div>
         )}
