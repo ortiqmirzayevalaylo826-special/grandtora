@@ -6,6 +6,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { demoContent } from './seed-demo-data';
 
 export const DEMO_ACCOUNTS = [
   { email: 'demo.student1@grantora.demo', role: 'STUDENT', note: "Madina — to'ldirilgan profil, saqlanganlar, arizalar, eslatma" },
@@ -76,5 +77,6 @@ export async function demoUsers(db: PrismaClient) {
   if (s2 && !(await db.complaint.findFirst({ where: { reporterId: s2.id } }))) {
     await db.complaint.create({ data: { reporterId: s2.id, kind: 'GRANT', subject: "Grant muddati noto'g'ri ko'rsatilgan", text: "Chevening sahifasida muddat o'tib ketgan, lekin rasmiy saytda hali ochiq. Iltimos, tekshirib ko'ring." } });
   }
+  await demoContent(db, hash);
   console.log('Demo foydalanuvchilar tayyor:', DEMO_ACCOUNTS.map((a) => a.email).join(', '));
 }

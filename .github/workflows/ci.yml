@@ -13,6 +13,7 @@ jobs:
           node-version: 20
       - run: npm install --include=dev
       - run: npx prisma generate --schema backend/prisma/schema.prisma
+      - run: npx tsc --noEmit -p backend/tsconfig.json   # seed fayllarini ham tekshiradi (Render build'da ts-node ularni kompilyatsiya qiladi)
       - run: npm run build -w backend
       - run: npm run build -w frontend
         env:

@@ -103,7 +103,7 @@ export class PanelController {
       { id: 'secrets', ok: env('JWT_ACCESS_SECRET', 24) && env('JWT_REFRESH_SECRET', 24) && env('OTP_PEPPER', 16), value: null },
       { id: 'cookie', ok: process.env.COOKIE_SECURE === 'true', value: null },
       { id: 'origin', ok: !!process.env.WEB_ORIGIN && !String(process.env.WEB_ORIGIN).includes('localhost'), value: process.env.WEB_ORIGIN ?? null },
-      { id: 'catalog', ok: published >= 30, value: `${published}/${grants}` },
+      { id: 'catalog', ok: published >= 15, value: `${published}/${grants}` },
     ], students };
   }
   // ================= ARIZALAR (platformaga topshirilgan) =================
