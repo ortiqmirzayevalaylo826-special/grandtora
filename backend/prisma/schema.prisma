@@ -42,6 +42,14 @@ enum ApplicationStatus {
   ACCEPTED
   REJECTED
 }
+/// Platformaga topshirilgan arizani admin ko'rib chiqish holati
+enum AppReview {
+  SUBMITTED
+  IN_REVIEW
+  NEEDS_INFO
+  APPROVED
+  REJECTED
+}
 enum OtpPurpose {
   REGISTER
   LOGIN
@@ -265,12 +273,20 @@ model Application {
   note          String?
   checklist     Json              @default("[]")   // hujjatlar checklisti: boolean[]
   submittedAt   DateTime?
+  // ---- Platformaga topshirish va admin ko'rib chiqishi ----
+  motivation    String?
+  docIds        Json              @default("[]")   // biriktirilgan hujjatlar (Document.id)
+  review        AppReview?
+  reviewNote    String?                            // talabaga ko'rinadigan admin izohi
+  reviewedAt    DateTime?
+  reviewedById  String?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   scholarship   Scholarship       @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
 
   @@unique([userId, scholarshipId])
+  @@index([review, updatedAt])
 }
 
 model Document {

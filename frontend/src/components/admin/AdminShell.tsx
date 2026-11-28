@@ -13,7 +13,7 @@ import { useBackClose } from '@/lib/useBackClose';
 import { Icon, Spinner } from '@/components/ui';
 import { Avatar, ToastProvider, useL } from './kit';
 
-interface Counters { tickets: number; reviews: number; grants: number; chats: number; complaints: number }
+interface Counters { tickets: number; reviews: number; grants: number; chats: number; complaints: number; applications: number }
 
 /** Admin qobig'i: chap sidebar (planshetda faqat ikonkalar, telefonda drawer), yuqorida qidiruv, bildirishnomalar, til va profil. */
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -50,6 +50,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const items: { href: string; label: string; icon: string; n?: number }[] = [
     { href: '/admin', label: L('Bosh sahifa', 'Главная', 'Dashboard'), icon: 'home' },
     { href: '/admin/scholarships', label: L('Grantlar', 'Гранты', 'Grants'), icon: 'list', n: cnt?.grants },
+    { href: '/admin/applications', label: L('Arizalar', 'Заявки', 'Applications'), icon: 'send', n: cnt?.applications },
     { href: '/admin/users', label: L('Foydalanuvchilar', 'Пользователи', 'Users'), icon: 'users' },
     { href: '/admin/messages', label: L('Xabarlar', 'Сообщения', 'Messages'), icon: 'msg', n: cnt?.chats },
     { href: '/admin/complaints', label: L('Shikoyatlar', 'Жалобы', 'Complaints'), icon: 'alert', n: cnt?.complaints },
@@ -63,6 +64,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   ];
   const active = (h: string) => (h === '/admin' ? path === h : path === h || path.startsWith(h + '/'));
   const alerts = [
+    { n: cnt?.applications ?? 0, href: '/admin/applications', t: L('yangi ariza', 'новых заявок', 'new applications'), icon: 'send' },
     { n: cnt?.tickets ?? 0, href: '/admin/tickets', t: L('yangi murojaat', 'новых обращений', 'new inquiries'), icon: 'inbox' },
     { n: cnt?.chats ?? 0, href: '/admin/messages', t: L("o'qilmagan xabar", 'непрочитанных сообщений', 'unread messages'), icon: 'msg' },
     { n: cnt?.complaints ?? 0, href: '/admin/complaints', t: L('ochiq shikoyat', 'открытых жалоб', 'open complaints'), icon: 'alert' },
@@ -74,7 +76,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const name = `${user.firstName} ${user.lastName}`.trim() || user.email;
 
   const GROUPS: { t: [string, string, string]; hrefs: string[] }[] = [
-    { t: ['Asosiy', 'Основное', 'Main'], hrefs: ['/admin', '/admin/scholarships', '/admin/users', '/admin/messages'] },
+    { t: ['Asosiy', 'Основное', 'Main'], hrefs: ['/admin', '/admin/scholarships', '/admin/applications', '/admin/users', '/admin/messages'] },
     { t: ['Boshqaruv', 'Управление', 'Manage'], hrefs: ['/admin/complaints', '/admin/reviews', '/admin/tickets', '/admin/freshness', '/admin/catalog', '/admin/audit'] },
     { t: ['Yordam', 'Помощь', 'Help'], hrefs: ['/admin/guide', '/admin/settings'] },
   ];

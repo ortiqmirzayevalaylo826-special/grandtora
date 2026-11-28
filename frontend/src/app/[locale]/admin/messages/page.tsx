@@ -34,7 +34,7 @@ export default function AdminMessages() {
 
   // polling: yangi xabarlar uchun har 15 soniyada
   useEffect(() => {
-    const t = setInterval(() => { if (document.visibilityState === 'visible') { list.reload(); if (sel) th.reload(); } }, 15000);
+    const t = setInterval(() => { if (document.visibilityState === 'visible') { list.reload(); if (sel) th.reload(); } }, 8000);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sel, tab, qd]);

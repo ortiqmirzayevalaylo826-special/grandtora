@@ -44,6 +44,9 @@ export async function demoUsers(db: PrismaClient) {
     const g = by(slug);
     if (g) await db.application.upsert({ where: { userId_scholarshipId: { userId: s1.id, scholarshipId: g.id } }, update: {}, create: { userId: s1.id, scholarshipId: g.id, status, note: 'Demo ariza' } });
   }
+  // Madinaning ariza topshirishi: admin "Arizalar" bo'limida ko'rinadi (demo)
+  const tb = by('turkiye-burslari');
+  if (tb) await db.application.updateMany({ where: { userId: s1.id, scholarshipId: tb.id, review: null }, data: { review: 'SUBMITTED', motivation: "Men dasturiy injiniringda tahsil olyapman va Turkiyada magistraturada o'qib, sohamdagi ilg'or tajribani O'zbekistonga olib kelmoqchiman.", submittedAt: new Date() } });
   const d = by('daad-scholarships');
   const k1 = `demo-${s1.id}-7`, k2 = `demo-${s1.id}-sys`;
   if (d) await db.notification.upsert({ where: { dedupeKey: k1 }, update: {}, create: { userId: s1.id, type: 'DEADLINE_REMINDER', dedupeKey: k1, payload: { scholarshipId: d.id, slug: d.slug, level: 7 } } });

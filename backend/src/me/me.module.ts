@@ -1,5 +1,5 @@
 import {
-  BadRequestException, Body, Controller, Delete, Get, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Put, Query, Res,
+  BadRequestException, Body, Controller, Delete, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Put, Query, Res,
   UploadedFile, UseGuards, UseInterceptors, UnauthorizedException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -7,7 +7,7 @@ import type { Response } from 'express';
 import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import { ApplicationStatus, StudyLevel } from '@prisma/client';
-import { IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.module';
 import { StorageService } from '../storage/storage.module';
 import { AuthUser, CurrentUser, JwtAuthGuard } from '../common/auth';
@@ -34,6 +34,10 @@ class AppDto {
   @IsOptional() @IsEnum(ApplicationStatus) status?: ApplicationStatus;
   @IsOptional() @IsString() @MaxLength(500) note?: string | null;
   @IsOptional() @IsArray() @IsBoolean({ each: true }) checklist?: boolean[];
+}
+class SubmitDto {
+  @IsString() @MinLength(30) @MaxLength(2000) motivation: string;
+  @IsArray() @ArrayMaxSize(10) @IsUUID('all', { each: true }) docIds: string[];
 }
 class ReportDto { @IsString() @MinLength(5) @MaxLength(500) text: string }
 class ReviewDto { @IsInt() @Min(1) @Max(5) stars: number; @IsString() @MinLength(10) @MaxLength(1000) text: string }
@@ -151,6 +155,22 @@ export class MeController {
     return this.db.application.update({
       where: { id: cur.id },
       data: { ...dto, submittedAt: dto.status === 'SUBMITTED' && !cur.submittedAt ? new Date() : undefined },
+    });
+  }
+  /** Arizani platformaga topshirish: motivatsiya + hujjatlar. Admin ko'rib chiqadi, javob bildirishnomada keladi. */
+  @Post('applications/:sid/submit') @HttpCode(200) async submitApp(@CurrentUser() u: AuthUser, @Param('sid', ParseUUIDPipe) sid: string, @Body() dto: SubmitDto) {
+    const cur = await this.db.application.findUnique({ where: { userId_scholarshipId: { userId: u.id, scholarshipId: sid } } });
+    if (!cur) throw new NotFoundException();
+    if (cur.review && cur.review !== 'NEEDS_INFO') throw new BadRequestException('already_submitted');
+    const ids = [...new Set(dto.docIds)];
+    if (ids.length === 0) throw new BadRequestException('docs_required');
+    const own = await this.db.document.count({ where: { userId: u.id, id: { in: ids } } });
+    if (own !== ids.length) throw new BadRequestException('bad_documents');
+    const profile = await this.db.profile.findUnique({ where: { userId: u.id } });
+    if (!profile?.country || !profile?.university) throw new BadRequestException('profile_incomplete');
+    return this.db.application.update({
+      where: { id: cur.id },
+      data: { motivation: dto.motivation.trim(), docIds: ids, review: 'SUBMITTED', reviewNote: null, reviewedAt: null, status: cur.status === 'INTERESTED' || cur.status === 'PREPARING' ? 'SUBMITTED' : undefined, submittedAt: cur.submittedAt ?? new Date() },
     });
   }
   @Delete('applications/:sid') async untrack(@CurrentUser() u: AuthUser, @Param('sid', ParseUUIDPipe) sid: string) {

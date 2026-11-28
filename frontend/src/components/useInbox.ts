@@ -91,6 +91,11 @@ export function useInbox({ list, enabled = true }: { list: boolean; enabled?: bo
       let v: Pick<Item, 'icon' | 'level' | 'group' | 'title' | 'body' | 'link'>;
       if (n.type === 'DEADLINE_REMINDER') v = { icon: 'calendar', level: Number(p.level ?? 7) <= 1 ? 'bad' : 'warn', group: 'reminder', title: L('Muddat yaqinlashmoqda', 'Приближается срок', 'Deadline approaching'), body: `${gt}${p.level ? ` · ${p.level} ${L('kun', 'дн.', 'd')}` : ''}`, link: n.scholarship ? `/app/grants/${n.scholarship.slug}` : null };
       else if (p.kind === 'chat') v = { icon: 'msg', level: 'info', group: 'message', title: L('Administratordan yangi xabar', 'Новое сообщение от администратора', 'New message from the admin'), body: String(p.body ?? ''), link: String(p.link ?? '/app/messages') };
+      else if (p.kind === 'application') {
+        const st = String(p.status);
+        const ttl = st === 'APPROVED' ? L('Arizangiz qabul qilindi', 'Ваша заявка одобрена', 'Your application was approved') : st === 'REJECTED' ? L('Arizangiz rad etildi', 'Ваша заявка отклонена', 'Your application was declined') : st === 'NEEDS_INFO' ? L("Arizangiz uchun ma'lumot kerak", 'Для заявки нужна информация', 'Your application needs more info') : L("Arizangiz ko'rib chiqilmoqda", 'Заявка на рассмотрении', 'Your application is under review');
+        v = { icon: 'send', level: st === 'APPROVED' ? 'good' : st === 'REJECTED' ? 'bad' : st === 'NEEDS_INFO' ? 'warn' : 'info', group: 'message', title: ttl, body: `${p.title ?? ''}${p.body ? `: ${p.body}` : ''}`, link: '/app/applications' };
+      }
       else if (p.kind === 'complaint') v = { icon: 'alert', level: 'good', group: 'message', title: L('Shikoyatingiz bo‘yicha javob', 'Ответ по жалобе', 'Reply to your complaint'), body: `${p.title ?? ''}${p.body ? `: ${p.body}` : ''}`, link: String(p.link ?? '/app/help?tab=complain') };
       else v = { icon: 'bell', level: 'info', group: 'system', title: String(p.title ?? L('Tizim xabari', 'Системное сообщение', 'System notice')), body: String(p.body ?? ''), link: null };
       out.push({ key: `s:${n.id}`, src: 'server', id: n.id, at: n.createdAt, read: !!n.readAt, ...v });

@@ -15,7 +15,7 @@ export default function StudentMessages() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
-  useEffect(() => { const t = setInterval(() => { if (document.visibilityState === 'visible') reload(); }, 15000); return () => clearInterval(t); }, [reload]);
+  useEffect(() => { const t = setInterval(() => { if (document.visibilityState === 'visible') reload(); }, 8000); return () => clearInterval(t); }, [reload]);
   useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [data?.messages.length]);
   if (loading && !data) return <Spinner />;
   if (error || !data) return <ErrorBox code={error ?? 'generic'} onRetry={reload} />;

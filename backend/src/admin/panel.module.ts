@@ -1,7 +1,7 @@
-import { BadRequestException, Body, Controller, Delete, Get, Header, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Header, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Prisma, ScholarshipStatus } from '@prisma/client';
-import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsEnum, IsBoolean, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.module';
 import { MailService } from '../mail/mail.module';
 import { StorageService } from '../storage/storage.module';
@@ -26,6 +26,11 @@ class BulkGrantsDto {
 }
 class BlockDto { @IsBoolean() blocked: boolean }
 class RoleDto { @IsIn(['STUDENT', 'ADMIN']) role: 'STUDENT' | 'ADMIN' }
+const APP_REVIEW = ['IN_REVIEW', 'NEEDS_INFO', 'APPROVED', 'REJECTED'] as const;
+class AppReviewDto {
+  @IsIn(APP_REVIEW as unknown as string[]) status: (typeof APP_REVIEW)[number];
+  @IsOptional() @IsString() @MaxLength(1000) note?: string;
+}
 class DeleteUserDto { @IsString() @MaxLength(254) confirmEmail: string }
 class TicketPatchDto {
   @IsOptional() @IsIn(['NEW', 'IN_PROGRESS', 'ANSWERED', 'CLOSED']) stage?: 'NEW' | 'IN_PROGRESS' | 'ANSWERED' | 'CLOSED';
@@ -86,11 +91,10 @@ export class PanelController {
   /** Ishga tushirishga tayyorlik: har bir band uchun ok/ogohlantirish (maxfiy qiymatlarsiz). */
   @Get('readiness') async readiness() {
     const env = (k: string, min = 1) => (process.env[k] ?? '').length >= min;
-    const [grants, published, students, demo] = await Promise.all([
+    const [grants, published, students] = await Promise.all([
       this.db.scholarship.count(),
       this.db.scholarship.count({ where: { status: 'PUBLISHED' } }),
       this.db.user.count({ where: { role: 'STUDENT' } }),
-      this.db.user.count({ where: { email: { endsWith: '@grantora.demo' } } }),
     ]);
     const m = this.mail.status();
     return { checks: [
@@ -99,10 +103,60 @@ export class PanelController {
       { id: 'secrets', ok: env('JWT_ACCESS_SECRET', 24) && env('JWT_REFRESH_SECRET', 24) && env('OTP_PEPPER', 16), value: null },
       { id: 'cookie', ok: process.env.COOKIE_SECURE === 'true', value: null },
       { id: 'origin', ok: !!process.env.WEB_ORIGIN && !String(process.env.WEB_ORIGIN).includes('localhost'), value: process.env.WEB_ORIGIN ?? null },
-      { id: 'demo', ok: demo === 0, value: String(demo) },
       { id: 'catalog', ok: published >= 30, value: `${published}/${grants}` },
     ], students };
   }
+  // ================= ARIZALAR (platformaga topshirilgan) =================
+  @Get('applications') async applications(@Query() q: any) {
+    const page = clamp(q.page, 1, 1, 100000), limit = clamp(q.limit, 20, 5, 100);
+    const where: Prisma.ApplicationWhereInput = {
+      review: q.status ? (q.status as any) : { not: null },
+      ...(q.q ? { OR: [{ user: { email: { contains: String(q.q), mode: 'insensitive' } } }, { user: { lastName: { contains: String(q.q), mode: 'insensitive' } } }, { scholarship: { slug: { contains: String(q.q), mode: 'insensitive' } } }] } : {}),
+    };
+    const [total, rows, counts] = await Promise.all([
+      this.db.application.count({ where }),
+      this.db.application.findMany({ where, orderBy: { updatedAt: 'desc' }, skip: (page - 1) * limit, take: limit,
+        include: { user: { select: { firstName: true, lastName: true, email: true } }, scholarship: { select: { slug: true, translations: { select: { locale: true, title: true } } } } } }),
+      this.db.application.groupBy({ by: ['review'], where: { review: { not: null } }, _count: true }),
+    ]);
+    return {
+      total, page, limit, pages: Math.max(1, Math.ceil(total / limit)), counts: Object.fromEntries(counts.map((c) => [c.review, c._count])),
+      items: rows.map((a) => ({ id: a.id, review: a.review, submittedAt: a.submittedAt, updatedAt: a.updatedAt, user: a.user, slug: a.scholarship.slug, title: (a.scholarship.translations.find((t) => t.locale === 'uz') ?? a.scholarship.translations[0])?.title ?? a.scholarship.slug })),
+    };
+  }
+  @Get('applications/:id') async application(@Param('id', ParseUUIDPipe) id: string) {
+    const a = await this.db.application.findUnique({ where: { id }, include: { user: { select: { id: true, firstName: true, lastName: true, email: true, profile: true } }, scholarship: { select: { slug: true, translations: { select: { locale: true, title: true } } } } } });
+    if (!a || !a.review) throw new NotFoundException();
+    const ids = Array.isArray(a.docIds) ? (a.docIds as string[]) : [];
+    const docs = ids.length ? await this.db.document.findMany({ where: { id: { in: ids }, userId: a.userId }, select: { id: true, name: true, mime: true, sizeBytes: true } }) : [];
+    const title = (a.scholarship.translations.find((t) => t.locale === 'uz') ?? a.scholarship.translations[0])?.title ?? a.scholarship.slug;
+    return { id: a.id, review: a.review, reviewNote: a.reviewNote, reviewedAt: a.reviewedAt, motivation: a.motivation, submittedAt: a.submittedAt, slug: a.scholarship.slug, title, user: a.user, documents: docs };
+  }
+  @Get('applications/:id/documents/:docId') async applicationDoc(@Param('id', ParseUUIDPipe) id: string, @Param('docId', ParseUUIDPipe) docId: string, @CurrentUser() adm: AuthUser, @Req() req: any, @Res() res: any) {
+    const a = await this.db.application.findUnique({ where: { id } });
+    const ids = Array.isArray(a?.docIds) ? (a!.docIds as string[]) : [];
+    if (!a || !a.review || !ids.includes(docId)) throw new NotFoundException(); // faqat arizaga biriktirilgan hujjat
+    const d = await this.db.document.findFirst({ where: { id: docId, userId: a.userId } });
+    if (!d) throw new NotFoundException();
+    const buf = await this.storage.get(d.storageKey);
+    await this.audit(adm, 'APPLICATION_DOC_VIEW', 'Application', id, req, { doc: d.name });
+    res.setHeader('Content-Type', d.mime);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(d.name)}`);
+    res.send(buf);
+  }
+  @Patch('applications/:id/review') async reviewApplication(@Param('id', ParseUUIDPipe) id: string, @Body() d: AppReviewDto, @CurrentUser() adm: AuthUser, @Req() req: any) {
+    const a = await this.db.application.findUnique({ where: { id }, include: { scholarship: { select: { slug: true, translations: { select: { locale: true, title: true } } } } } });
+    if (!a || !a.review) throw new NotFoundException();
+    const note = d.note?.trim() || null;
+    if ((d.status === 'NEEDS_INFO' || d.status === 'REJECTED') && !note) throw new BadRequestException('note_required');
+    await this.db.application.update({ where: { id }, data: { review: d.status, reviewNote: note, reviewedAt: new Date(), reviewedById: adm.id, status: d.status === 'APPROVED' ? 'ACCEPTED' : d.status === 'REJECTED' ? 'REJECTED' : d.status === 'IN_REVIEW' ? 'REVIEW' : undefined } });
+    const title = (a.scholarship.translations.find((t) => t.locale === 'uz') ?? a.scholarship.translations[0])?.title ?? a.scholarship.slug;
+    await this.db.notification.create({ data: { userId: a.userId, type: 'ADMIN_MESSAGE', dedupeKey: `app:${id}:${Date.now()}`, payload: { kind: 'application', status: d.status, title, body: note ?? '' } } });
+    await this.audit(adm, `APPLICATION_${d.status}`, 'Application', id, req, { note: note?.slice(0, 80) });
+    return { ok: true };
+  }
+
   @Get('mail/status') mailStatus() { return this.mail.status(); }
   @Post('mail/test') @HttpCode(200) async mailTest(@CurrentUser() a: AuthUser) {
     const u = await this.db.user.findUnique({ where: { id: a.id }, select: { email: true } });
@@ -112,14 +166,15 @@ export class PanelController {
   }
 
   @Get('counters') async counters() {
-    const [tickets, reviews, grants, chats, complaints] = await Promise.all([
+    const [tickets, reviews, grants, chats, complaints, applications] = await Promise.all([
       this.db.contactMessage.count({ where: { stage: 'NEW' } }),
       this.db.review.count({ where: { status: 'PENDING' } }),
       this.db.scholarship.count({ where: { status: 'PENDING' } }),
       this.db.chatMessage.count({ where: { fromAdmin: false, readAt: null, conversation: { archived: false } } }),
       this.db.complaint.count({ where: { status: { in: ['OPEN', 'REVIEWING'] } } }),
+      this.db.application.count({ where: { review: { in: ['SUBMITTED', 'IN_REVIEW'] } } }),
     ]);
-    return { tickets, reviews, grants, chats, complaints };
+    return { tickets, reviews, grants, chats, complaints, applications };
   }
 
   @Get('dashboard') async dashboard(@Query('days') daysQ?: string) {
