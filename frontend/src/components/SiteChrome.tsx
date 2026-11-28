@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { usePathname } from '@/i18n/routing';
 import Footer from './Footer';
+import EntryGate from './EntryGate';
 import Header from './Header';
 
 /** Ommaviy sayt: sarlavha + pastki qism. Kabinet (/app) va admin (/admin) o'z qobig'iga ega — u yerda ko'rsatilmaydi. */
@@ -22,6 +23,8 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       <Header />
       <main>{children}</main>
       <Footer />
+      <div className="h-20 md:hidden" aria-hidden />
+      <EntryGate />
     </>
   );
 }

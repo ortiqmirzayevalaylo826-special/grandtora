@@ -4,17 +4,15 @@ import { api, useQuery } from '@/lib/client';
 import { ErrorBox, Notice, PageHead, Spinner, useErr } from '@/components/ui';
 import LockSettings from '@/components/LockSettings';
 import NotifSettings from '@/components/NotifSettings';
-import { Tabs, useL } from '@/components/admin/kit';
+import { useL } from '@/components/admin/kit';
+import SettingsHub from '@/components/SettingsHub';
 import PwaClient from '@/components/PwaClient';
 import LangSwitch from '@/components/LangSwitch';
 import { AvatarUploader, DeleteAccount, ExportData, NameLangForm, PasswordForm, SessionsList, SettingsCard as Card } from '@/components/AccountParts';
 
-type Tab = 'account' | 'notify' | 'security' | 'data';
-
 export default function Settings() {
   const L = useL();
   const err = useErr();
-  const [tab, setTab] = useState<Tab>('account');
   const { data, error, loading, reload } = useQuery<{ emailReminders: boolean; email: string }>('/me/settings');
   const [rem, setRem] = useState(true);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -28,13 +26,8 @@ export default function Settings() {
   return (
     <div className="space-y-5">
       <PageHead title={L('Sozlamalar', 'Настройки', 'Settings')} />
-      <Tabs value={tab} onChange={setTab} items={[
-        { v: 'account', label: L('Hisob', 'Аккаунт', 'Account') },
-        { v: 'notify', label: L('Bildirishnomalar', 'Уведомления', 'Notifications') },
-        { v: 'security', label: L('Xavfsizlik', 'Безопасность', 'Security') },
-        { v: 'data', label: L("Ma'lumotlar", 'Данные', 'Data') },
-      ]} />
-      {tab === 'account' && (
+      <SettingsHub sections={[
+    { id: 'account', icon: 'user', title: L('Hisob', 'Аккаунт', 'Account'), sub: L('Rasm, ism, til, ilova', 'Фото, имя, язык, приложение', 'Photo, name, language, app'), body: (
         <div className="space-y-5">
           <Card title={L('Profil rasmi', 'Фото профиля', 'Profile photo')}><AvatarUploader /></Card>
           <Card title={L("Shaxsiy ma'lumotlar", 'Личные данные', 'Personal details')}><NameLangForm /></Card>
@@ -42,8 +35,8 @@ export default function Settings() {
             <div className="flex flex-wrap gap-3"><LangSwitch full /><PwaClient /></div>
           </Card>
         </div>
-      )}
-      {tab === 'notify' && (
+    ) },
+    { id: 'notify', icon: 'bell', title: L('Bildirishnomalar', 'Уведомления', 'Notifications'), sub: L('Ilova va email eslatmalar', 'Напоминания в приложении и email', 'App and email reminders'), body: (
         <div className="space-y-5">
         <Card title={L('Ilova bildirishnomalari', 'Уведомления приложения', 'App notifications')}><NotifSettings /></Card>
         <Card title={L('Email eslatmalar', 'Напоминания по email', 'Email reminders')} hint={data.email}>
@@ -53,20 +46,21 @@ export default function Settings() {
           <p className="mt-4 text-xs text-muted">{L("Administrator xabarlari va shikoyatlar natijasi «Bildirishnomalar» sahifasida doim ko'rinadi.", 'Сообщения администратора и результаты жалоб всегда видны на странице «Уведомления».', 'Admin messages and complaint outcomes always appear on the Notifications page.')}</p>
         </Card>
         </div>
-      )}
-      {tab === 'security' && (
+    ) },
+    { id: 'security', icon: 'lock', title: L('Xavfsizlik', 'Безопасность', 'Security'), sub: L('PIN, barmoq izi, parol, qurilmalar', 'PIN, отпечаток, пароль, устройства', 'PIN, fingerprint, password, devices'), body: (
         <div className="space-y-5">
           <Card title={L('PIN-kod va barmoq izi', 'PIN-код и отпечаток', 'PIN & fingerprint')}><LockSettings /></Card>
           <Card title={L("Parolni o'zgartirish", 'Смена пароля', 'Change password')}><PasswordForm /></Card>
           <Card title={L('Faol qurilmalar', 'Активные устройства', 'Active devices')} hint={L("Hisobingizga kirgan qurilmalar. Notanish qurilmani chiqarib yuboring.", 'Устройства, с которых выполнен вход. Завершите незнакомые сеансы.', 'Devices signed in to your account. End any you do not recognise.')}><SessionsList /></Card>
         </div>
-      )}
-      {tab === 'data' && (
+    ) },
+    { id: 'data', icon: 'folder', title: L("Ma'lumotlar", 'Данные', 'Data'), sub: L('Yuklab olish va hisobni o\'chirish', 'Скачать данные и удалить аккаунт', 'Download data and delete account'), body: (
         <div className="space-y-5">
           <Card title={L("Ma'lumotlarni yuklab olish", 'Скачать данные', 'Download your data')} hint={L('Profil, saqlanganlar, arizalar, hujjatlar ro‘yxati, sharh va shikoyatlaringiz.', 'Профиль, избранное, заявки, список документов, отзывы и жалобы.', 'Your profile, saved grants, applications, document list, reviews and complaints.')}><ExportData /></Card>
           <section className="rounded-2xl border border-red-200 bg-white p-5"><h2 className="mb-3 text-lg font-bold text-red-700">{L("Hisobni o'chirish", 'Удаление аккаунта', 'Delete account')}</h2><DeleteAccount /></section>
         </div>
-      )}
+    ) },
+      ]} />
     </div>
   );
 }
