@@ -8,7 +8,7 @@ import UserAvatar from './UserAvatar';
 import { Icon } from './ui';
 
 /** Profil tugmasi: bosilganda menyu ochiladi — profil, sozlamalar, til, ilovani o'rnatish va chiqish. */
-export default function ProfileMenu({ profileHref, settingsHref, admin = false }: { profileHref: string; settingsHref: string; admin?: boolean }) {
+export default function ProfileMenu({ profileHref, settingsHref, admin = false, onSite = false }: { profileHref: string; settingsHref: string; admin?: boolean; onSite?: boolean }) {
   const L = useL();
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -41,7 +41,9 @@ export default function ProfileMenu({ profileHref, settingsHref, admin = false }
           <Link href={profileHref} className={row} role="menuitem"><Icon name="user" className="h-5 w-5 text-muted" />{L('Mening profilim', 'Мой профиль', 'My profile')}</Link>
           <Link href={settingsHref} className={row} role="menuitem"><Icon name="settings" className="h-5 w-5 text-muted" />{L('Sozlamalar', 'Настройки', 'Settings')}</Link>
           {!admin && <Link href="/app/help" className={row} role="menuitem"><Icon name="info" className="h-5 w-5 text-muted" />{L("Yordam va qo'llanma", 'Помощь и руководство', 'Help & guide')}</Link>}
-          <Link href="/" className={row} role="menuitem"><Icon name="external" className="h-5 w-5 text-muted" />{L('Saytga qaytish', 'На сайт', 'Back to site')}</Link>
+          {onSite
+            ? <Link href={admin ? '/admin' : '/app'} className={row} role="menuitem"><Icon name="home" className="h-5 w-5 text-muted" />{L('Kabinetga o‘tish', 'Перейти в кабинет', 'Go to dashboard')}</Link>
+            : <Link href="/" className={row} role="menuitem"><Icon name="external" className="h-5 w-5 text-muted" />{L('Saytga qaytish', 'На сайт', 'Back to site')}</Link>}
           {/* Telefonda til va o'rnatish tugmalari shu yerda (yuqori panelda joy tor) */}
           <div className="px-1 py-2 md:hidden"><PwaClient full /></div>
           <div className="my-1 border-t border-navy/10" />
