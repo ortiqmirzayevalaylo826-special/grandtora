@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth';
 import { PageTitle, useL } from '@/components/admin/kit';
 import SettingsHub from '@/components/SettingsHub';
 import MailCheck from '@/components/MailCheck';
+import Readiness from '@/components/Readiness';
 import LockSettings from '@/components/LockSettings';
 import LangSwitch from '@/components/LangSwitch';
 import PwaClient from '@/components/PwaClient';
@@ -17,6 +18,9 @@ export default function AdminSettings() {
     <div className="max-w-5xl">
       <PageTitle title={L('Sozlamalar', 'Настройки', 'Settings')} sub={user?.email} />
       <SettingsHub sections={[
+    { id: 'ready', icon: 'check', title: L('Ishga tushirishga tayyorlik', 'Готовность к запуску', 'Launch readiness'), sub: L('Nima sozlanmagan', 'Что не настроено', 'What is not configured'), body: (
+        <Card title={L('Tayyorlik ro‘yxati', 'Чек-лист готовности', 'Readiness checklist')}><Readiness /></Card>
+    ) },
     { id: 'profile', icon: 'user', title: L('Profil', 'Профиль', 'Profile'), sub: L('Rasm va shaxsiy maʼlumotlar', 'Фото и личные данные', 'Photo and personal details'), body: (
         <div className="space-y-5">
           <Card title={L('Profil rasmi', 'Фото профиля', 'Profile photo')}><AvatarUploader /></Card>

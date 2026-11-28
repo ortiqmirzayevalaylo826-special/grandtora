@@ -477,3 +477,11 @@ model Complaint {
 
   @@index([status, createdAt])
 }
+
+/// Hujjat fayllari (Supabase Storage ulanmagan bo'lsa shu yerda saqlanadi — Render'da lokal papka deploy'da o'chib ketadi)
+model FileBlob {
+  key       String   @id
+  mime      String
+  data      Bytes
+  createdAt DateTime @default(now())
+}

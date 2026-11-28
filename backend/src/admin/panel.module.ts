@@ -4,6 +4,7 @@ import { Prisma, ScholarshipStatus } from '@prisma/client';
 import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.module';
 import { MailService } from '../mail/mail.module';
+import { StorageService } from '../storage/storage.module';
 import { AuthUser, CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../common/auth';
 
 // ---------- yordamchilar ----------
@@ -70,7 +71,7 @@ class BroadcastDto { @IsString() @MinLength(2) @MaxLength(120) title: string; @I
 @Roles('ADMIN')
 @Controller('admin/panel')
 export class PanelController {
-  constructor(private db: PrismaService, private mail: MailService) {}
+  constructor(private db: PrismaService, private mail: MailService, private storage: StorageService) {}
 
   private audit(a: AuthUser, action: string, entity: string, entityId: string | undefined, req: any, meta?: object, result = 'OK') {
     return this.db.auditLog.create({ data: { actorId: a.id, action, entity, entityId, meta: meta as any, ip: req?.ip, userAgent: String(req?.headers?.['user-agent'] ?? '').slice(0, 200), result, section: sectionOf(entity) } }).catch(() => undefined);
@@ -82,6 +83,26 @@ export class PanelController {
   }
 
   // ================= STATISTIKA =================
+  /** Ishga tushirishga tayyorlik: har bir band uchun ok/ogohlantirish (maxfiy qiymatlarsiz). */
+  @Get('readiness') async readiness() {
+    const env = (k: string, min = 1) => (process.env[k] ?? '').length >= min;
+    const [grants, published, students, demo] = await Promise.all([
+      this.db.scholarship.count(),
+      this.db.scholarship.count({ where: { status: 'PUBLISHED' } }),
+      this.db.user.count({ where: { role: 'STUDENT' } }),
+      this.db.user.count({ where: { email: { endsWith: '@grantora.demo' } } }),
+    ]);
+    const m = this.mail.status();
+    return { checks: [
+      { id: 'mail', ok: m.configured, value: m.provider },
+      { id: 'storage', ok: this.storage.mode() !== 'disk', value: this.storage.mode() },
+      { id: 'secrets', ok: env('JWT_ACCESS_SECRET', 24) && env('JWT_REFRESH_SECRET', 24) && env('OTP_PEPPER', 16), value: null },
+      { id: 'cookie', ok: process.env.COOKIE_SECURE === 'true', value: null },
+      { id: 'origin', ok: !!process.env.WEB_ORIGIN && !String(process.env.WEB_ORIGIN).includes('localhost'), value: process.env.WEB_ORIGIN ?? null },
+      { id: 'demo', ok: demo === 0, value: String(demo) },
+      { id: 'catalog', ok: published >= 30, value: `${published}/${grants}` },
+    ], students };
+  }
   @Get('mail/status') mailStatus() { return this.mail.status(); }
   @Post('mail/test') @HttpCode(200) async mailTest(@CurrentUser() a: AuthUser) {
     const u = await this.db.user.findUnique({ where: { id: a.id }, select: { email: true } });
